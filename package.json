@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
+    "test:health": "npx playwright test tests/health.spec.ts --reporter=line,allure-playwright",
+    "test:life": "npx playwright test tests/lifeterm.spec.ts --reporter=line,allure-playwright",
     "allure:generate": "npx allure generate allure-results --clean -o allure-report",
     "allure:open": "npx allure open allure-report",
     "test:allure": "npm run test && npm run allure:generate && npm run allure:open",

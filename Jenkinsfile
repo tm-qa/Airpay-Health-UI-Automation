@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'SUITE',
+            choices: ['health', 'life'],
+            description: 'Select which tests to run'
+        )
+    }
+
     tools {
         nodejs "NodeJS25"
     }
@@ -38,11 +46,9 @@ pipeline {
             }
         }
 
-        stage('Run Playwright Tests (All Specs)') {
+        stage('Run Playwright Tests') {
             steps {
-                sh '''
-                    npx playwright test tests --reporter=line,allure-playwright
-                '''
+                sh "npm run test:${params.SUITE}"
             }
         }
     }
