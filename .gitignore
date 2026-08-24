@@ -1,0 +1,53 @@
+
+
+# ── Playwright ──────────────────────────────────────────────
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# ── Allure ──────────────────────────────────────────────────
+/allure-results/
+/allure-report/
+
+# ── Environment / Secrets ───────────────────────────────────
+.env
+.env.*
+!.env.example
+/.playwright-*/
+
+# ── IDE / Editor ────────────────────────────────────────────
+.vscode/
+
+# ── macOS ────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+
+# ── storageState ───────────────────────────────────────────
+/storageState.json
+
+#--downloads--
+/downloads/
+
+# # Playwright
+# node_modules/
+# /test-results/
+# /playwright-report/
+# /blob-report/
+# /playwright/.cache/
+# /playwright/.auth/
+
+
+
+
+
+# # Playwright
+# node_modules/
+# /test-results/
+# /playwright-report/
+# /blob-report/
+# /playwright/.cache/
+# /playwright/.auth/
