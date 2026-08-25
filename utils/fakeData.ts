@@ -9,7 +9,6 @@ const SPOUSE_MALE_NAMES = ["Rahul Amar Sharma", "Vikram Raj Kumar"];
 const FATHER_NAMES = ["Ramesh Kumar Patel", "Suresh Amar Singh"];
 const MOTHER_NAMES = ["Sushila Devi Patel", "Kamla Devi Singh"];
 
-/** Fake member name when sheet has no Name column */
 export function fakeMemberName(relation: string, index = 1, gender = ""): string | undefined {
     const rel = relation.toUpperCase();
     const gen = gender.toUpperCase();
@@ -25,13 +24,11 @@ export function fakeMemberName(relation: string, index = 1, gender = ""): string
     return undefined;
 }
 
-/** Fake child name when sheet has no Name column */
 export function fakeChildName(relation: string, index: number): string {
     const names = relation.toUpperCase() === "SON" ? SON_NAMES : DAUGHTER_NAMES;
     return names[(index - 1) % names.length];
 }
 
-/** Build nominee from insurer defaults (sheet has no nominee columns) */
 export function buildNominee(defaults: NomineeDefaults): NomineeDetails {
     const dob = ageToDob(defaults.age);
     return {

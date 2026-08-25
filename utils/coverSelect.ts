@@ -18,7 +18,6 @@ export async function selectCoverFromDropdown(page: Page, coverAmount: number) {
         await dropdown.click();
         const scroller = page.locator(".rc-virtual-list-holder:visible");
 
-        // Scroll to top first so smaller values are visible
         if (await scroller.count()) {
             await scroller.evaluate((el) => { el.scrollTop = 0; });
         }
@@ -37,7 +36,6 @@ export async function selectCoverFromDropdown(page: Page, coverAmount: number) {
             }
         }
 
-        // Close dropdown and verify
         await page.keyboard.press("Escape");
         const newText = (await dropdown.innerText().catch(() => "")).trim().toLowerCase();
         if (newText === label) break;

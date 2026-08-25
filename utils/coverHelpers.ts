@@ -1,4 +1,3 @@
-/** Convert Excel CoverAmount (500000) to UI dropdown labels */
 export function coverAmountToLabels(amount: number): string[] {
     const lakhs = amount / 100_000;
     const n = Number.isInteger(lakhs) ? String(lakhs) : String(lakhs);

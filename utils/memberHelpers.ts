@@ -9,14 +9,12 @@ const RELATION_MAP: Record<string, string> = {
     DAUGHTER: "Daughter",
 };
 
-/** Labels to try in profile dropdown */
 export function getProfileDropdownLabels(member: HealthMember): string[] {
     const rel = member.relation.toUpperCase();
     if (rel === "SPOUSE") return [member.uiRelation, "Spouse"];
     return [member.uiRelation];
 }
 
-/** First member per relation type — Son/Daughter selected once, count set via dropdown */
 export function getUniqueMemberTypes(members: HealthMember[]): HealthMember[] {
     const seen = new Set<string>();
     return members.filter((m) => {

@@ -37,7 +37,6 @@ export class ProfilePage {
 
     async healthProfileJourney(scenario: HealthScenario) {
         await expect(this.page).toHaveURL(/.*\/profile/);
-        // Wait for the gender radio to be rendered (profile API may take time to load form)
         await this.maleRadio.waitFor({ state: "visible", timeout: 45000 });
 
         await this.selectProposerGender(scenario);
@@ -48,7 +47,6 @@ export class ProfilePage {
         await this.diseaseBtn.click();
         await this.goNext(scenario);
 
-        // HDFC shows Age vs DOB radio; ICICI goes straight to DOB fields
         if (await this.dobRadio.isVisible({ timeout: 3000 }).catch(() => false)) {
             await this.dobRadio.click();
         }
@@ -60,7 +58,6 @@ export class ProfilePage {
         await this.goNext(scenario);
         await this.goNext(scenario);
 
-        // Some member combinations have an extra step (e.g. "Save your quotes")
         try {
             await this.page.waitForURL(/\/results?/, { timeout: 15000 });
         } catch {
