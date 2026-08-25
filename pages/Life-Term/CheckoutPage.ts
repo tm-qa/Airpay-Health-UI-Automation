@@ -38,7 +38,7 @@ export class CheckoutPage extends BasePage {
         await this.fillProposerDetails();
         await this.sharePaymentLink();
         await this.approveOnReview();
-       await this.biPdfCompare();
+        await this.biPdfCompare();
     }
 
     private async biPdfCompare() {
