@@ -6,7 +6,7 @@ import { getScenarios } from "./scenarioBuilder";
 export function registerHealthInsurerTests(config: InsurerConfig, timeoutMs = 180000) {
     const scenarios = getScenarios(config);
 
-    test.describe(`Health Tests - ${config.name}`, () => {
+    test.describe(`@Health Health Tests - ${config.name}`, () => {
         test.beforeEach(async ({ page }) => {
             for (let attempt = 0; attempt < 3; attempt++) {
                 await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
