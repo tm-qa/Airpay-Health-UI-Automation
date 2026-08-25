@@ -7,7 +7,7 @@ import { getLifeTermScenarios } from "../utils/lifeTermScenarioBuilder";
 
 const LIFE_TERM_SCENARIOS = getLifeTermScenarios();
 
-test.describe("Life Term Tests", () => {
+test.describe("@LifeTerm Life Term Tests", () => {
     let dashboardPage: Dashboardpage;
     let profilePage: ProfilePage;
     let resultPage: ResultPage;
