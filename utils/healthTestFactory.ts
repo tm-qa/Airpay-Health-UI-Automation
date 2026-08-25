@@ -7,6 +7,8 @@ export function registerHealthInsurerTests(config: InsurerConfig, timeoutMs = 18
     const scenarios = getScenarios(config);
 
     test.describe(`@Health Health Tests - ${config.name}`, () => {
+        test.describe.configure({ mode: "serial" });
+
         test.beforeEach(async ({ page }) => {
             for (let attempt = 0; attempt < 3; attempt++) {
                 await page.goto("/dashboard", { waitUntil: "domcontentloaded" });

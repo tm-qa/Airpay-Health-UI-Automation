@@ -8,7 +8,7 @@ import { getLifeTermScenarios } from "../utils/lifeTermScenarioBuilder";
 const LIFE_TERM_SCENARIOS = getLifeTermScenarios();
 
 test.describe("@LifeTerm Life Term Tests", () => {
-   // test.describe.configure({ mode: "serial" });
+   test.describe.configure({ mode: "serial" });
 
     let dashboardPage: Dashboardpage;
     let profilePage: ProfilePage;
