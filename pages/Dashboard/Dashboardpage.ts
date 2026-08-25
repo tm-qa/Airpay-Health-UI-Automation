@@ -40,12 +40,12 @@ export class Dashboardpage extends BasePage {
 
     async navigateToLifeTermInsurance(cif = "12345") {
         await expect(this.page).toHaveURL(/.*\/dashboard/);
-        await this.click(this.sellBtn, "Sell");
+        await this.click(this.sellBtn, "click on Sell button");
         await this.fill(this.cifNumInput, cif, "CIF");
-        await this.click(this.entrBtn, "Enter CIF");
+        await this.click(this.entrBtn, "click on Enter CIF button");
         await expect(this.verifyContinueBtn).toBeVisible();
-        await this.click(this.verifyContinueBtn, "VERIFY CONTINUE");
+        await this.click(this.verifyContinueBtn, "click on VERIFY CONTINUE button");
         await expect(this.lifeTermInsurance).toBeVisible();
-        await this.click(this.lifeTermInsurance, "Term");
+        await this.click(this.lifeTermInsurance, "click on Term button");
     }
 }

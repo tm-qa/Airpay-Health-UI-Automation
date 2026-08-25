@@ -27,17 +27,17 @@ export class ProfilePage extends BasePage {
     }
 
     async lifeTermProfileJourney(_scenario: LifeTermScenario) {
-        await this.check(this.noRadioBtn, "Select No");
-        await this.fill(this.pincode, "400002", "Pincode");
+        await this.check(this.noRadioBtn, "click on No radio button");
+        await this.fill(this.pincode, "400002", "fill Pincode");
         await this.fullScreenScreenshot("Pincode");
-        await this.click(this.nextBtn, "Next");
-        await this.click(this.occupation, "Open Occupation");
-        await this.click(this.salariedBtn, "Select Salaried");
+        await this.click(this.nextBtn, "click on Next button");
+        await this.click(this.occupation, "click on Occupation button");
+        await this.click(this.salariedBtn, "click on Salaried button");
         await this.click(this.educationalQualification, "Open Educational Qualification");
-        await this.click(this.graduateAndAboveBtn, "Select Graduate and above");
+        await this.click(this.graduateAndAboveBtn, "click on Graduate and above button");
         await this.fullScreenScreenshot("Educational Qualification");
-        await this.click(this.nextBtn, "Next");
+        await this.click(this.nextBtn, "click on Next button");
         await this.fullScreenScreenshot("Income");
-        await this.click(this.nextBtn, "Next - Save quote");
+        await this.click(this.nextBtn, "click on Next - Save quote button");
     }
 }

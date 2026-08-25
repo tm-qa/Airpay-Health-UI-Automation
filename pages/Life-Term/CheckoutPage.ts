@@ -61,20 +61,20 @@ export class CheckoutPage extends BasePage {
     }
 
     private async fillProposerDetails() {
-        await this.click(this.maritalStatus, "Open Marital Status", { force: true });
+        await this.click(this.maritalStatus, "select on Marital Status button", { force: true });
         await this.fullScreenScreenshot("Marital Status");
-        await this.click(this.page.getByText("Married").nth(1), "Select Married");
-        await this.fill(this.pan, "ABCDR2345A", "PAN");
-        await this.click(this.continueBtn, "Continue");
-        await this.check(this.correspondenceAddressSame, "Correspondence address same");
+        await this.click(this.page.getByText("Married").nth(1), "click on Married button");
+        await this.fill(this.pan, "ABCDR2345A", "fill PAN");
+        await this.click(this.continueBtn, "click on Continue button");
+        await this.check(this.correspondenceAddressSame, "click on Correspondence address same button");
         await this.fullScreenScreenshot("Correspondence address same");
-        await this.click(this.continueBtn, "Continue");
+        await this.click(this.continueBtn, "click on Continue button");
     }
 
     private async sharePaymentLink() {
-        await this.click(this.sharePaymentLinkBtn, "Share Payment Link");
+        await this.click(this.sharePaymentLinkBtn, "click on Share Payment Link button");
         if (await this.copyLink.isVisible().catch(() => false)) {
-            await this.click(this.copyLink, "Copy Link");
+            await this.click(this.copyLink, "click on Copy Link button");
         }
         await this.fullScreenScreenshot("Share Payment Link");
     }
@@ -87,14 +87,14 @@ export class CheckoutPage extends BasePage {
 
         const [download] = await Promise.all([
             this.page.waitForEvent("download"),
-            this.click(this.clickHere, "Click here BI"),
+            this.click(this.clickHere, "click on Click here BI button"),
         ]);
         fs.mkdirSync("lifeBiCompare", { recursive: true });
         await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
 
-        await this.check(this.termsCheckbox.first(), "Accept terms");
-        await this.fullScreenScreenshot("Accept terms");
-        await this.click(this.approveBtn, "Approve");
+        await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
+        await this.fullScreenScreenshot("Accept terms checkbox");
+        await this.click(this.approveBtn, "click on Approve button");
         await this.page.waitForURL(/apptracker|applicationform|payment|success/i, { timeout: 60000 }).catch(() => {});
     }
 
