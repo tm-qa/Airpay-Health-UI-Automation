@@ -36,6 +36,7 @@ test.describe("@LifeTerm Life Term Tests", () => {
             console.log("Completed Result Journey");
             await checkoutPage.lifeTermCheckoutJourney(scenario);
             console.log("Completed Checkout Journey");
+            console.log(`AUTOMATION_LOG: ==========> ${scenario.tcId} | ${scenario.combination} | ${scenario.sumAssured} ========== Passed`);
         });
     }
 });
