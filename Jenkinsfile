@@ -21,14 +21,14 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh '''
-                    npm install
-                    npm audit fix --force || true
-                '''
-            }
-        }
+        // stage('Install Dependencies') {
+        //     steps {
+        //         sh '''
+        //             npm install
+        //             npm audit fix --force || true
+        //         '''
+        //     }
+        // }
 
         stage('Clean Old Allure Results') {
             steps {

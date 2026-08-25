@@ -5,7 +5,7 @@ export class BasePage {
     constructor(protected page: Page) {}
 
     private async report(action: string, takeSnap = false, fullPage = false) {
-        console.log(action);
+        console.log("AUTOMATION_LOG: ==> " + action);
         if (!takeSnap) return;
         await step(action, async () => {
             await attachment(`${action} - Screenshot`, await this.page.screenshot({ fullPage }), "image/png");
