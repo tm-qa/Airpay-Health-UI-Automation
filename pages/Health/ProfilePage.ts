@@ -109,7 +109,7 @@ export class ProfilePage {
                     .first();
 
                 if (await option.isVisible({ timeout: 3000 }).catch(() => false)) {
-                    await option.click({ force: true });
+                    await option.evaluate((el) => (el as HTMLElement).click());
                     return label;
                 }
             }
