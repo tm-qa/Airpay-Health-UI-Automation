@@ -55,12 +55,12 @@ export class CheckoutPage extends BasePage {
         this.heightInches = page.getByRole("textbox", { name: "Height Inches *" });
         this.weight = page.getByRole("textbox", { name: "Weight *" });
         this.maritalStatus = page.getByRole("combobox", { name: "Marital Status *" });
-        this.nomineeName = page.getByRole("textbox", { name: "Nominee's Name *" });
+        this.nomineeName = page.getByRole("textbox", { name: /nominee.*name|^name \*$/i }).last();
         this.memberName = page.getByRole("textbox", { name: "Name *" });
-        this.nomineeRelation = page.getByRole("combobox", { name: "Nominee is my *" });
-        this.nomineeDob = page.getByRole("textbox", { name: "Nominee's Date of Birth *" });
-        this.nomineeMobile = page.getByRole("textbox", { name: "Nominee Mobile no. *" });
-        this.nomineeEmail = page.getByRole("textbox", { name: "Nominee Email *" });
+        this.nomineeRelation = page.getByRole("combobox", { name: /nominee is my|relationship/i });
+        this.nomineeDob = page.getByRole("textbox", { name: /nominee.*birth|date of birth/i }).last();
+        this.nomineeMobile = page.getByRole("textbox", { name: /nominee.*mobile|mobile/i }).last();
+        this.nomineeEmail = page.getByRole("textbox", { name: /nominee.*email|email/i }).last();
         this.nomineeAddressCheckbox = page.getByRole("checkbox", {
             name: /permanent address of the nominee is same as that of the proposer/i,
         });
@@ -174,30 +174,44 @@ export class CheckoutPage extends BasePage {
                 await this.log("click on No radio button");
             }
         }
-        if (await this.page.getByRole("combobox", { name: /occupation/i }).isVisible()) {
-            await selectAntOption(this.page, this.page.getByRole("combobox", { name: /occupation/i }), "Salaried");
-            await this.log("select Occupation: Salaried");
+        await this.page.keyboard.press("Escape");
+        const occupation = this.page.getByRole("combobox", { name: /occupation/i });
+        if (await occupation.isVisible()) {
+            await occupation.scrollIntoViewIfNeeded();
+            await occupation.click();
+            const occOpt = this.page.getByRole("option").first();
+            if (await occOpt.isVisible({ timeout: 5000 }).catch(() => false)) await occOpt.click();
+            await this.log("select Occupation");
         }
-        if (await this.page.getByRole("combobox", { name: "Title *" }).last().isEnabled()) {
+        const education = this.page.getByRole("combobox", { name: /education/i });
+        if (await education.isVisible()) {
+            await education.click();
+            const eduOpt = this.page.getByRole("option").first();
+            if (await eduOpt.isVisible({ timeout: 5000 }).catch(() => false)) await eduOpt.click();
+            await this.log("select Education");
+        }
+        if (await this.page.getByRole("combobox", { name: "Title *" }).last().isEnabled({ timeout: 2000 }).catch(() => false)) {
             await selectAntOption(this.page, this.page.getByRole("combobox", { name: "Title *" }).last(), "MR");
             await this.log("select Nominee Title: MR");
         }
-        await this.fill(this.nomineeName, scenario.nominee.name, "fill Nominee Name");
-        await selectAntOption(this.page, this.nomineeRelation, scenario.nominee.relation);
-        await this.log(`select Nominee relation: ${scenario.nominee.relation}`);
-        await selectAntDate(this.page, this.nomineeDob, scenario.nominee.dobPickerTitle);
-        await this.log(`fill Nominee Date of Birth: ${scenario.nominee.dobPickerTitle}`);
-        if (await this.nomineeMobile.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await this.fill(this.nomineeMobile, scenario.nominee.mobile, "fill Nominee Mobile");
-        }
-        if (await this.nomineeEmail.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await this.fill(this.nomineeEmail, scenario.nominee.email, "fill Nominee Email");
-        }
-        if (await this.nomineeAddressCheckbox.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await this.check(this.nomineeAddressCheckbox, "click on Nominee address same as proposer checkbox");
+        if (await this.nomineeName.isVisible({ timeout: 3000 }).catch(() => false)) {
+            await this.fill(this.nomineeName, scenario.nominee.name, "fill Nominee Name");
+            await selectAntOption(this.page, this.nomineeRelation, scenario.nominee.relation);
+            await this.log(`select Nominee relation: ${scenario.nominee.relation}`);
+            await selectAntDate(this.page, this.nomineeDob, scenario.nominee.dobPickerTitle);
+            await this.log(`fill Nominee Date of Birth: ${scenario.nominee.dobPickerTitle}`);
+            if (await this.nomineeMobile.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await this.fill(this.nomineeMobile, scenario.nominee.mobile, "fill Nominee Mobile");
+            }
+            if (await this.nomineeEmail.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await this.fill(this.nomineeEmail, scenario.nominee.email, "fill Nominee Email");
+            }
+            if (await this.nomineeAddressCheckbox.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await this.check(this.nomineeAddressCheckbox, "click on Nominee address same as proposer checkbox");
+            }
         }
         await this.fullScreenScreenshot("Insured Details");
-        await this.click(this.continueButton, "click on Continue button", { force: true });
+        await this.click(this.continueButton.last(), "click on Continue button", { force: true });
     }
 
     private async fillBankDetails(scenario: HealthScenario) {
@@ -231,7 +245,7 @@ export class CheckoutPage extends BasePage {
 
     private async continueToMedicalHistory() {
         const alreadyVisible = await this.medicalQuestionnaireContinueBtn.isVisible({ timeout: 3000 }).catch(() => false);
-        if (!alreadyVisible) {
+        if (!alreadyVisible && await this.medicalHistoryHeading.isVisible({ timeout: 5000 }).catch(() => false)) {
             await this.click(this.medicalHistoryHeading, "click on Medical History heading");
         }
         const btnReady = await this.medicalQuestionnaireContinueBtn

@@ -26,14 +26,14 @@ export async function selectAntDate(page: Page, field: Locator, pickerTitle: str
     if (await picker.count()) await picker.click({ force: true });
     else await field.click({ force: true });
 
-    const yearBtn = page.getByRole("button", { name: "Choose a year" }).last();
+    const datePicker = page.locator(".ant-picker-dropdown:not(.ant-picker-dropdown-hidden)").last();
+    await expect(datePicker).toBeVisible({ timeout: 10000 });
+    const yearBtn = datePicker.getByRole("button", { name: "Choose a year" });
     if (!(await yearBtn.isVisible().catch(() => false))) {
         await field.locator("xpath=..").getByRole("img", { name: "calendar" }).click({ force: true });
     }
     await expect(yearBtn).toBeVisible({ timeout: 10000 });
-    const datePicker = page.locator(".ant-picker-dropdown:not(.ant-picker-dropdown-hidden)").last();
-    await expect(yearBtn).toBeEnabled({ timeout: 5000 });
-    await yearBtn.click({ force: true });
+    await yearBtn.click();
     await navigateToYear(datePicker, targetYear);
     await datePicker.locator(".ant-picker-cell-inner").filter({ hasText: new RegExp(`^${year}$`) }).first().click();
 
