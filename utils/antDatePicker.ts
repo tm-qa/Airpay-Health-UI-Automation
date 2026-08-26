@@ -31,11 +31,11 @@ export async function selectAntDate(page: Page, field: Locator, pickerTitle: str
         await field.locator("xpath=..").getByRole("img", { name: "calendar" }).click({ force: true });
     }
     await expect(yearBtn).toBeVisible({ timeout: 10000 });
-    const datePicker = yearBtn.locator("xpath=ancestor::div[.//table][1]");
+    const datePicker = page.locator(".ant-picker-dropdown:not(.ant-picker-dropdown-hidden)").last();
     await expect(yearBtn).toBeEnabled({ timeout: 5000 });
     await yearBtn.click({ force: true });
     await navigateToYear(datePicker, targetYear);
-    await datePicker.getByRole("cell", { name: year, exact: true }).click();
+    await datePicker.locator(".ant-picker-cell-inner").filter({ hasText: new RegExp(`^${year}$`) }).first().click();
 
     const dayCell = datePicker.locator(`td[title="${pickerTitle}"]`);
     if (await dayCell.isVisible()) {
@@ -49,7 +49,7 @@ export async function selectAntDate(page: Page, field: Locator, pickerTitle: str
 }
 
 async function navigateToYear(datePicker: Locator, targetYear: number) {
-    const yearCell = datePicker.getByRole("cell", { name: String(targetYear), exact: true });
+    const yearCell = datePicker.locator(".ant-picker-cell-inner").filter({ hasText: new RegExp(`^${targetYear}$`) }).first();
     const targetDecade = Math.floor(targetYear / 10) * 10;
     const decadeLabel = `${targetDecade}-${targetDecade + 9}`;
     const prevBtn = datePicker.getByRole("button", { name: /Last year|Previous decade/i }).first();

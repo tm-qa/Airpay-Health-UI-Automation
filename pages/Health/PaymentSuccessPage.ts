@@ -1,13 +1,13 @@
 import { Page, Locator, expect } from "@playwright/test";
+import { BasePage } from "../BasePage";
 
-export class PaymentSuccessPage {
-    readonly page: Page;
+export class PaymentSuccessPage extends BasePage {
     readonly successUrl: RegExp;
     readonly applicationNumberText: Locator;
     readonly policyNumberText: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
         this.successUrl = /health-insurance\/success\?referenceId=/;
         this.applicationNumberText = page.getByText(/Application Number:/i);
         this.policyNumberText = page.getByText(/Policy Number:/i);
@@ -25,7 +25,8 @@ export class PaymentSuccessPage {
             ?.replace(/Policy Number:\s*/i, "")
             .trim();
 
-        console.log(`Application Number: ${applicationNumber}`);
-        console.log(`Policy Number: ${policyNumber}`);
+        await this.log(`Application Number: ${applicationNumber}`);
+        await this.log(`Policy Number: ${policyNumber}`);
+        await this.fullScreenScreenshot("Payment Success");
     }
 }

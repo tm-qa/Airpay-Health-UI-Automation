@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
-import { HealthMember, HealthScenario } from "../../types/health.types";
+import { BasePage } from "../BasePage";
+import { HealthScenario } from "../../types/health.types";
 import { fillAntDateField } from "../../utils/antDatePicker";
 import { selectAntOption } from "../../utils/antSelect";
 import {
@@ -10,8 +11,7 @@ import {
     getUniqueMemberTypes,
 } from "../../utils/memberHelpers";
 
-export class ProfilePage {
-    readonly page: Page;
+export class ProfilePage extends BasePage {
     readonly insuredCombo: Locator;
     readonly diseaseBtn: Locator;
     readonly nextBtn: Locator;
@@ -23,7 +23,7 @@ export class ProfilePage {
     readonly pincode: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
         this.insuredCombo = page.getByRole("combobox", { name: /Who would you like to get insured/i });
         this.diseaseBtn = page.locator("div").filter({ hasText: "Tell us about the insuredWhat" }).nth(2);
         this.nextBtn = page.getByRole("button", { name: "Next", exact: true });
@@ -43,17 +43,20 @@ export class ProfilePage {
         await this.selectMembers(scenario);
         await this.fillVisiblePincode(scenario.members[0]?.pincode);
         await this.selectDeductible(scenario);
+        await this.fullScreenScreenshot("Pincode");
 
-        await this.diseaseBtn.click();
+        await this.click(this.diseaseBtn, "click on Disease / medical details");
         await this.goNext(scenario);
 
         if (await this.dobRadio.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await this.dobRadio.click();
+            await this.click(this.dobRadio, "click on Date of birth radio button");
         }
         await this.fillMembersDob(scenario);
+        await this.fullScreenScreenshot("Date of birth");
         await this.goNext(scenario);
 
-        await this.noRadioBtn.click();
+        await this.click(this.noRadioBtn, "click on No radio button");
+        await this.fullScreenScreenshot("Medical questions");
         await this.goNext(scenario);
         await this.goNext(scenario);
         await this.goNext(scenario);
@@ -72,36 +75,42 @@ export class ProfilePage {
     private async goNext(scenario: HealthScenario) {
         await this.fillVisiblePincode(scenario.members[0]?.pincode);
         await this.page.locator(".loader_loaderContainer__rDdBU").waitFor({ state: "hidden", timeout: 15000 }).catch(() => {});
-        await this.nextBtn.click();
+        await this.click(this.nextBtn, "click on Next button");
     }
 
     private async fillVisiblePincode(pincode?: string) {
         if (!pincode) return;
-        if (await this.parentsPincode.isVisible()) await this.parentsPincode.fill(pincode);
-        if (await this.pincode.isVisible()) await this.pincode.fill(pincode);
+        if (await this.parentsPincode.isVisible()) await this.fill(this.parentsPincode, pincode, "fill Parents Pincode");
+        if (await this.pincode.isVisible()) await this.fill(this.pincode, pincode, "fill Pincode");
     }
 
     private async selectProposerGender(scenario: HealthScenario) {
         const gender = getProposerGender(scenario.members);
-        await (gender === "F" ? this.femaleRadio : this.maleRadio).check({ force: true });
+        if (gender === "F") {
+            await this.check(this.femaleRadio, "click on Female radio button", { force: true });
+        } else {
+            await this.check(this.maleRadio, "click on Male radio button", { force: true });
+        }
     }
 
     private async clearSelectedMembers() {
-        await this.insuredCombo.click();
+        await this.click(this.insuredCombo, "click on Who would you like to get insured dropdown");
         const clearAll = this.page.locator(".ant-select-clear");
         if (await clearAll.isVisible()) {
-            await clearAll.click();
+            await this.click(clearAll, "click on Clear all members");
             return;
         }
         const removeBtns = this.page.locator(".ant-select-selection-item-remove");
-        while ((await removeBtns.count()) > 0) await removeBtns.first().click();
+        while ((await removeBtns.count()) > 0) {
+            await this.click(removeBtns.first(), "click on Remove selected member");
+        }
     }
 
     private async pickDropdownOption(labels: string[]) {
         for (const label of labels) {
             for (let attempt = 0; attempt < 3; attempt++) {
                 await this.page.keyboard.press("Escape");
-                await this.insuredCombo.click();
+                await this.click(this.insuredCombo, "click on Who would you like to get insured dropdown");
 
                 const option = this.page
                     .locator(".ant-select-dropdown:visible")
@@ -110,6 +119,7 @@ export class ProfilePage {
 
                 if (await option.isVisible({ timeout: 3000 }).catch(() => false)) {
                     await option.evaluate((el) => (el as HTMLElement).click());
+                    await this.log(`click on ${label} option`);
                     return label;
                 }
             }
@@ -139,23 +149,31 @@ export class ProfilePage {
 
         if (sonCount > 0) {
             const combo = this.page.getByRole("combobox", { name: /Number of sons/i });
-            if (await combo.isVisible()) await selectAntOption(this.page, combo, String(sonCount));
+            if (await combo.isVisible()) {
+                await selectAntOption(this.page, combo, String(sonCount));
+                await this.log(`select Number of sons: ${sonCount}`);
+            }
         }
         if (daughterCount > 0) {
             const combo = this.page.getByRole("combobox", { name: /Number of daughters/i });
-            if (await combo.isVisible()) await selectAntOption(this.page, combo, String(daughterCount));
+            if (await combo.isVisible()) {
+                await selectAntOption(this.page, combo, String(daughterCount));
+                await this.log(`select Number of daughters: ${daughterCount}`);
+            }
         }
 
         const tags = await this.page.locator(".ant-select-selection-item-content").allTextContents();
-        console.log(
-            `${scenario.tcId} selected: [${tags.join(", ")}] sons=${sonCount} daughters=${daughterCount}`
+        await this.log(
+            `${scenario.tcId} selected members: [${tags.join(", ")}] sons=${sonCount} daughters=${daughterCount}`
         );
         expect(tags.length, `${scenario.tcId}: member tags`).toBe(uniqueTypes.length);
     }
 
     private async selectDeductible(scenario: HealthScenario) {
         const deductible = this.page.getByText(scenario.deductible, { exact: true }).first();
-        if (await deductible.isVisible()) await deductible.click();
+        if (await deductible.isVisible()) {
+            await this.click(deductible, `click on Deductible ${scenario.deductible}`);
+        }
     }
 
     private async fillMembersDob(scenario: HealthScenario) {
@@ -172,6 +190,7 @@ export class ProfilePage {
                 const dobField = this.page.getByRole("textbox", { name: new RegExp(`^${label}`, "i") });
                 if (await dobField.first().isVisible()) {
                     await fillAntDateField(this.page, dobField.first(), member.dob);
+                    await this.log(`fill Date of birth for ${label}: ${member.dob}`);
                     break;
                 }
             }

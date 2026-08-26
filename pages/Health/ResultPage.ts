@@ -1,13 +1,13 @@
 import { Page, Locator, expect } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
+import { BasePage } from "../BasePage";
 import { InsurerConfig } from "../../config/insurers/types";
 import { HealthScenario } from "../../types/health.types";
 import { coverHeadingRegex } from "../../utils/coverHelpers";
 import { selectCoverFromDropdown } from "../../utils/coverSelect";
 
-export class ResultPage {
-    readonly page: Page;
+export class ResultPage extends BasePage {
     readonly buyNowBtn: Locator;
     readonly policyBrochure: Locator;
     readonly policyWording: Locator;
@@ -17,7 +17,7 @@ export class ResultPage {
     private readonly config: InsurerConfig;
 
     constructor(page: Page, config: InsurerConfig) {
-        this.page = page;
+        super(page);
         this.config = config;
         this.buyNowBtn = page.getByRole("button", { name: "Buy Now" });
         this.policyWording = config.pdfWordingPattern
@@ -34,6 +34,7 @@ export class ResultPage {
         await expect(this.page).toHaveURL(/\/results?/, { timeout: 60000 });
         await this.waitForQuotes();
 
+        await this.log(`select Cover amount: ${scenario.coverAmount}`);
         await selectCoverFromDropdown(this.page, scenario.coverAmount);
         await this.waitForQuotes();
 
@@ -41,7 +42,7 @@ export class ResultPage {
         await expect(this.page.getByText(coverHeadingRegex(scenario.coverAmount)).first()).toBeVisible({
             timeout: 15000,
         });
-        console.log(`${scenario.tcId}: verified cover ${lakhs}L on results page`);
+        await this.log(`verified cover ${lakhs}L on results page`);
 
         const plan = this.page.getByText(scenario.expectedPlan);
         const expectVisible = scenario.planVisibility.toUpperCase() === "YES";
@@ -53,7 +54,7 @@ export class ResultPage {
 
         const noPlans = this.page.getByText(/no plans to match|no results found/i);
         if (await noPlans.isVisible({ timeout: 8000 }).catch(() => false)) {
-            console.log(`No plans available for ${scenario.tcId} (API returned no results)`);
+            await this.log(`No plans available for ${scenario.tcId}`);
             return false;
         }
 
@@ -62,14 +63,9 @@ export class ResultPage {
                 timeout: 30000,
             });
         } catch {
-            console.log(`Plan "${scenario.expectedPlan}" not returned by API for ${scenario.tcId}`);
+            await this.log(`Plan "${scenario.expectedPlan}" not returned by API for ${scenario.tcId}`);
             return false;
         }
-
-        const planElemCount = await plan.count();
-        const planElemTag = await plan.first().evaluate(el => `${el.tagName}.${el.className.split(' ')[0]}`).catch(() => "?");
-        const planElemText = (await plan.first().innerText().catch(() => "")).substring(0, 60);
-        console.log(`${scenario.tcId}: getByText("${scenario.expectedPlan}") found ${planElemCount} elements. first=${planElemTag} text="${planElemText}"`);
 
         const planCard = plan.first().locator(
             "xpath=ancestor::div[.//button[contains(., 'View Details')]][1]"
@@ -77,21 +73,18 @@ export class ResultPage {
 
         const hasCard = await planCard.isVisible({ timeout: 5000 }).catch(() => false);
         if (!hasCard) {
-            console.log(`Plan "${scenario.expectedPlan}" found but no View Details button (insurer rejected quote) for ${scenario.tcId}`);
+            await this.log(`Plan "${scenario.expectedPlan}" found but no View Details button for ${scenario.tcId}`);
             return false;
         }
 
-        const cardTag = await planCard.evaluate(el => `${el.tagName} class="${el.className.substring(0, 80)}"`).catch(() => "?");
-        const cardText = (await planCard.innerText().catch(() => "")).replace(/\n/g, "↵").substring(0, 120);
-        console.log(`${scenario.tcId}: plan card element: ${cardTag}`);
-        console.log(`${scenario.tcId}: plan card text: "${cardText}"`);
-        await planCard.getByRole("button", { name: "View Details" }).click();
+        await this.click(planCard.getByRole("button", { name: "View Details" }), "click on View Details button");
+        await this.fullScreenScreenshot("View Details");
 
         await expect(this.buyNowBtn).toBeVisible();
         if (this.config.pdfWordingPattern && this.config.pdfBrochurePattern) {
             await this.downloadAndVerifyPDFs();
         }
-        await this.buyNowBtn.click();
+        await this.click(this.buyNowBtn, "click on Buy Now button");
         await this.page.waitForURL(/\/(kyc|checkout)/, { timeout: 30000 });
         return true;
     }
@@ -105,7 +98,7 @@ export class ResultPage {
     private async downloadAndVerifyPDFs() {
         if (!fs.existsSync(this.downloadDir)) fs.mkdirSync(this.downloadDir, { recursive: true });
 
-        await this.downloadsSection.click();
+        await this.click(this.downloadsSection, "click on Downloads button");
 
         for (const locator of [this.policyWording, this.policyBrochure]) {
             const href = await locator.getAttribute("href");
@@ -117,6 +110,8 @@ export class ResultPage {
             expect(response.ok()).toBeTruthy();
             fs.writeFileSync(filePath, await response.body());
             expect(fs.statSync(filePath).size).toBeGreaterThan(0);
+            await this.log(`downloaded ${fileName}`);
         }
+        await this.fullScreenScreenshot("Downloads");
     }
 }

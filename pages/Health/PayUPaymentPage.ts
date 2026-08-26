@@ -1,7 +1,7 @@
 import { Page, Locator, expect } from "@playwright/test";
+import { BasePage } from "../BasePage";
 
-export class PayUPaymentPage {
-    readonly page: Page;
+export class PayUPaymentPage extends BasePage {
     readonly testBank: Locator;
     readonly testBankProceed: Locator;
     readonly loginHeading: Locator;
@@ -11,7 +11,7 @@ export class PayUPaymentPage {
     readonly simulateSuccess: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
         this.testBank = page.locator("#net-banking-list-TESTPGNB-pop").getByText("Test bank");
         this.testBankProceed = page.locator("#net-banking-list-TESTPGNB-pop").getByRole("button", { name: "PROCEED" });
         this.loginHeading = page.getByRole("heading", { name: "Login" });
@@ -25,15 +25,15 @@ export class PayUPaymentPage {
         await expect(this.page).toHaveURL(/apitest\.payu\.in/, { timeout: 60000 });
 
         if (!(await this.loginHeading.isVisible())) {
-            await this.testBank.click();
-            await this.testBankProceed.click();
+            await this.click(this.testBank, "click on Test bank");
+            await this.click(this.testBankProceed, "click on PROCEED button");
             await expect(this.loginHeading).toBeVisible({ timeout: 20000 });
         }
 
-        await this.userId.fill("payu");
-        await this.password.fill("payu");
-        await this.submitButton.click();
+        await this.fill(this.userId, "payu", "fill PayU User ID");
+        await this.fill(this.password, "payu", "fill PayU Password");
+        await this.click(this.submitButton, "click on Submit button");
         await expect(this.simulateSuccess).toBeVisible({ timeout: 20000 });
-        await this.simulateSuccess.click();
+        await this.click(this.simulateSuccess, "click on Simulate success response");
     }
 }

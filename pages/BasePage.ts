@@ -22,8 +22,8 @@ export class BasePage {
         await this.report(`${name}: ${value}`, false);
     }
 
-    async check(l: Locator, name = "Check") {
-        await l.check();
+    async check(l: Locator, name = "Check", options?: Parameters<Locator["check"]>[0]) {
+        await l.check(options);
         await this.report(name, false);
     }
 
@@ -50,6 +50,10 @@ export class BasePage {
     async clear(l: Locator, name = "Clear") {
         await l.clear();
         await this.report(name, false);
+    }
+
+    async log(action: string) {
+        await this.report(action, false);
     }
 
     async fullScreenScreenshot(name = "Full Page Screenshot") {
