@@ -30,15 +30,15 @@ export class ProfilePage extends BasePage {
         this.log("Starting Profile Journey");
         await this.check(this.noRadioBtn, "click on No radio button");
         await this.fill(this.pincode, "400002", "fill Pincode");
-        await this.fullScreenScreenshot("Pincode");
+        await this.fullScreenScreenshot("Pincode Page Screenshot");
         await this.click(this.nextBtn, "click on Next button");
         await this.click(this.occupation, "click on Occupation button");
         await this.click(this.salariedBtn, "click on Salaried button");
         await this.click(this.educationalQualification, "Open Educational Qualification");
         await this.click(this.graduateAndAboveBtn, "click on Graduate and above button");
-        await this.fullScreenScreenshot("Educational Qualification");
+        await this.fullScreenScreenshot("Educational Qualification Page Screenshot");
         await this.click(this.nextBtn, "click on Next button");
-        await this.fullScreenScreenshot("Income");
+        await this.fullScreenScreenshot("Income Page Screenshot");
         await this.click(this.nextBtn, "click on Next - Save quote button");
         this.log("Completed Profile Journey");
     }

@@ -64,12 +64,12 @@ export class CheckoutPage extends BasePage {
 
     private async fillProposerDetails() {
         await this.click(this.maritalStatus, "select on Marital Status button", { force: true });
-        await this.fullScreenScreenshot("Marital Status");
+        await this.fullScreenScreenshot("Marital Status Page Screenshot");
         await this.click(this.page.getByText("Married").nth(1), "click on Married button");
         await this.fill(this.pan, "ABCDR2345A", "fill PAN");
         await this.click(this.continueBtn, "click on Continue button");
         await this.check(this.correspondenceAddressSame, "click on Correspondence address same button");
-        await this.fullScreenScreenshot("Correspondence address same");
+        await this.fullScreenScreenshot("Correspondence address same Page Screenshot");
         await this.click(this.continueBtn, "click on Continue button");
     }
 
