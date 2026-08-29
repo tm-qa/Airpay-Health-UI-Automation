@@ -126,7 +126,7 @@ export class ResultPage extends BasePage {
     }
 
     private async openPlanDetailsAndDownloads() {
-        await this.click(this.viewDetailsBtn.first(), "View Details");
+        await this.click(this.viewDetailsBtn.first(), "Result Page: View Details");
         await this.fullScreenScreenshot("View Details");
         if (await this.downloadsSection.isVisible().catch(() => false)) {
             await this.click(this.downloadsSection, "click on Downloads button");
