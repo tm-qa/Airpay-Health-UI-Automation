@@ -29,13 +29,13 @@ test.describe("@LifeTerm Life Term Tests", () => {
             test.setTimeout(180000);
             console.log(`========== ${scenario.tcId} | ${scenario.combination} | ${scenario.sumAssured} ==========`);
             await dashboardPage.navigateToLifeTermInsurance(scenario.cifNumber);
-            console.log("Navigated to Life Term Insurance");
+            // console.log("Navigated to Life Term Insurance");
             await profilePage.lifeTermProfileJourney(scenario);
-            console.log("Completed Profile Journey");
+            // console.log("Completed Profile Journey");
             await resultPage.lifeTermResultJourney(scenario);
-            console.log("Completed Result Journey");
+            // console.log("Completed Result Journey");
             await checkoutPage.lifeTermCheckoutJourney(scenario);
-            console.log("Completed Checkout Journey");
+            // console.log("Completed Checkout Journey");
             console.log(`AUTOMATION_LOG: ==========> ${scenario.tcId} | ${scenario.combination} | ${scenario.sumAssured} ========== Passed`);
         });
     }

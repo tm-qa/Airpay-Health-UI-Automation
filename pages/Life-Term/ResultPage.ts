@@ -40,6 +40,7 @@ export class ResultPage extends BasePage {
     }
 
     async lifeTermResultJourney(scenario: LifeTermScenario) {
+        this.log("Starting Result Journey");
         await expect(this.page).toHaveURL(/\/results?/, { timeout: 60000 });
 
         await this.selectSumAssured(scenario.sumAssured);
@@ -49,6 +50,7 @@ export class ResultPage extends BasePage {
         await this.openPlanDetailsAndDownloads();
         await this.click(this.buyNowBtn, "click on Buy Now button");
         await this.page.waitForURL(/\/(kyc|checkout|proposal)/, { timeout: 30000 });
+        this.log("Completed Result Journey");
     }
 
     private async selectSumAssured(amount: number) {
@@ -143,7 +145,7 @@ export class ResultPage extends BasePage {
         ]);
         fs.mkdirSync("lifeBiCompare", { recursive: true });
         await download.saveAs("lifeBiCompare/BiPDPPage.pdf");
-        console.log("Policy brochure is downloaded on PDP page");
+        this.log("Policy brochure is downloaded on PDP page");
     }
 
     private async clickPdfViewerDownload(target: Page = this.page) {

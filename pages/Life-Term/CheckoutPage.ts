@@ -35,10 +35,12 @@ export class CheckoutPage extends BasePage {
     }
 
     async lifeTermCheckoutJourney(_scenario: LifeTermScenario) {
+        this.log("Starting Checkout Journey");
         await this.fillProposerDetails();
         await this.sharePaymentLink();
         await this.approveOnReview();
        await this.biPdfCompare();
+       this.log("Completed Checkout Journey");
     }
 
     private async biPdfCompare() {

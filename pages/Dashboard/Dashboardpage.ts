@@ -47,5 +47,6 @@ export class Dashboardpage extends BasePage {
         await this.click(this.verifyContinueBtn, "click on VERIFY CONTINUE button");
         await expect(this.lifeTermInsurance).toBeVisible();
         await this.click(this.lifeTermInsurance, "click on Term button");
+        this.log("Navigated to Life Term Insurance");
     }
 }

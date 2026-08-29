@@ -27,6 +27,7 @@ export class ProfilePage extends BasePage {
     }
 
     async lifeTermProfileJourney(_scenario: LifeTermScenario) {
+        this.log("Starting Profile Journey");
         await this.check(this.noRadioBtn, "click on No radio button");
         await this.fill(this.pincode, "400002", "fill Pincode");
         await this.fullScreenScreenshot("Pincode");
@@ -39,5 +40,6 @@ export class ProfilePage extends BasePage {
         await this.click(this.nextBtn, "click on Next button");
         await this.fullScreenScreenshot("Income");
         await this.click(this.nextBtn, "click on Next - Save quote button");
+        this.log("Completed Profile Journey");
     }
 }
