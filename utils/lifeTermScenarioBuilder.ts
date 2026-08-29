@@ -37,6 +37,7 @@ export function getLifeTermScenarios(): LifeTermScenario[] {
             maturityAge: Number(row.MaturityAge),
             policyTerm: Number(row.PolicyTerm),
             premiumPaymentTerm: Number(row.PremiumPaymentTerm),
+            planName: text(row.PlanName),
             paymentFrequency: text(row.PaymentFrequency),
             rider1: text(row.Rider1),
             rider1Package: text(row.Rider1Package),

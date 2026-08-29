@@ -21,4 +21,5 @@ export interface LifeTermScenario {
     rider4SI: number | undefined;
     expected: string;
     whyNegative: string;
+    planName: string;
 }
