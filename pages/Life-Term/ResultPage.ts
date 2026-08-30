@@ -91,16 +91,6 @@ export class ResultPage extends BasePage {
         await this.click(this.page.getByRole("option", { name: /claim settlement ratio/i }), "Sort by Claim Settlement Ratio");
     }
 
-    // private async applyRiders(scenario: LifeTermScenario) {
-    //     if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4].some(Boolean)) return;
-    //     await this.viewAddons.waitFor({ state: "visible", timeout: 15000 });
-    //     await this.click(this.viewAddons, "click on View addons button");
-    //     if (scenario.rider1) await this.selectCriticalIllnessCover(scenario.rider1Package, scenario.rider1SI);
-    //     if (scenario.rider2) await this.selectAccidentalTotalPermanentDisability(scenario.rider2SI);
-    //     if (scenario.rider3) await this.selectWaiverOfPremium();
-    //     if (scenario.rider4) await this.selectAccidentalDeathCover(scenario.rider4SI);
-    // }
-
     private async applyRiders(scenario: LifeTermScenario) {
         if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4].some(Boolean)) return;
 
@@ -265,111 +255,22 @@ export class ResultPage extends BasePage {
         await this.click(viewDetailsBtn, `click on View Details button for plan: ${planName}`);
     }
 
-    // private async clickViewDetailsByPlanName(planName: string) {
-
-    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
-    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
-
-    //     if (!isPlanCardVisible) {
-    //         console.log(`Plan "${planName}" is not visible on Result Page — insurer may not have returned this plan.`);
-    //         this.log(`Plan card not found for plan: ${planName}`);
-    //         return;
-    //     }
-
-    //     const viewDetailsBtn = planCard.getByRole("button", { name: /view details/i });
-    //     const isViewDetailsVisible = await viewDetailsBtn.isVisible().catch(() => false);
-
-    //     if (!isViewDetailsVisible) {
-    //         console.log(`"View Details" button is not visible for plan: ${planName}`);
-    //         this.log(`View Details button not visible for plan: ${planName}`);
-    //         return;
-    //     }
-
-    //     await this.click(viewDetailsBtn, `click on View Details button for plan: ${planName}`);
-    // }
-
-    // async validatenegativeCasesScenarios(type?: string, expected?: string, planName?: string) {
-    //     console.log("validating negative tc");
-    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
-    //     //await planCard.waitFor({ state: "visible", timeout: 15000 });
-
-    //     if (type === "negative" && !await planCard.isVisible()) {
-    //         this.log("Plan is not supported for negative cases : " + expected);
-    //         return;
-    //     }
-    //     else if (type === "positive" && !await planCard.isVisible()) {
-    //         this.log("Plan is not visible due to insurer side issue")
-    //     }
-    // }
-
-    // async validatenegativeCasesScenarios(type?: string, expected?: string, planName?: string) {
-    //     console.log("validating negative tc");
-    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
-    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
-
-    //     if (type === "Negative" && !isPlanCardVisible) {
-    //         this.log("Plan is not supported for negative cases : " + expected);
-    //         return;
-    //     }
-    //     else if (type === "Positive" && !isPlanCardVisible) {
-    //         this.log("Plan is not visible due to insurer side issue");
-    //         return;
-    //     }
-    // }
-
-    // private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
-    //     console.log("validating negative tc");
-    //     await this.page.waitForLoadState("networkidle");
-    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
-    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
-
-    //     if (type === "Negative" && !isPlanCardVisible) {
-    //         this.log("Plan is not supported for negative cases : " + expected);
-    //         return true;
-    //     }
-    //     else if (type === "Positive" && !isPlanCardVisible) {
-    //         this.log("Plan is not visible due to insurer side issue");
-    //         return true;
-    //     }
-
-    //     return false;
-    // }
-
-    // private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
-    //     this.log("validating negative tc");
-    //     await this.page.waitForLoadState("networkidle");
-    
-    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
-    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
-    
-    //     if (isPlanCardVisible) {
-    //         return false;
-    //     }
-    
-    //     if (type === "Negative") {
-    //         this.log("Plan is not supported for negative cases : " + expected);
-    //     } else if (type === "Positive") {
-    //         this.log("Plan is not visible due to insurer side issue");
-    //     }
-    
-    //     return true;
-    // }
 
     private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
         this.log("validating negative tc");
-    
+
         const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
         const noPlansFound = this.page.locator(".LifeResultCardModule_noPlansFound__PG7QW");
-    
+
         await planCard.first().or(noPlansFound).waitFor({ state: "visible", timeout: 30000 });
-    
+
         const isPlanCardVisible = await planCard.first().isVisible().catch(() => false);
-    
+
         if (isPlanCardVisible) {
             await this.fullScreenScreenshot("Result Page: Plan Card Visible Screenshot");
             return false;
         }
-    
+
         if (type === "Negative") {
             this.log("Plan is not supported for negative cases : " + expected);
             await this.fullScreenScreenshot("Result Page: Plan Card Not Supported Screenshot");
@@ -377,7 +278,7 @@ export class ResultPage extends BasePage {
             this.log("Plan is not visible due to insurer side issue");
             await this.fullScreenScreenshot("Result Page: Plan Card Not Visible Screenshot");
         }
-    
+
         return true;
     }
 

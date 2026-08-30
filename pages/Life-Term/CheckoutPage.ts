@@ -98,25 +98,6 @@ export class CheckoutPage extends BasePage {
         await this.fullScreenScreenshot("Share Payment Link");
     }
 
-    // private async approveOnReview() {
-    //     const reviewUrl = await this.buildReviewUrl();
-    //     if (!reviewUrl) throw new Error("Could not resolve life-insurance review URL (missing referenceId)");
-
-    //     await this.page.goto(reviewUrl);
-
-    //     const [download] = await Promise.all([
-    //         this.page.waitForEvent("download"),
-    //         this.click(this.clickHere, "click on Click here BI button"),
-    //     ]);
-    //     fs.mkdirSync("lifeBiCompare", { recursive: true });
-    //     await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
-
-    //     await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
-    //     await this.fullScreenScreenshot("Accept terms checkbox");
-    //     await this.click(this.approveBtn, "click on Approve button");
-    //     await this.page.waitForURL(/apptracker|applicationform|payment|success/i, { timeout: 60000 }).catch(() => { });
-    // }
-
     private async approveOnReview() {
         const reviewUrl = await this.buildReviewUrl();
         if (!reviewUrl) throw new Error("Could not resolve life-insurance review URL (missing referenceId)");
