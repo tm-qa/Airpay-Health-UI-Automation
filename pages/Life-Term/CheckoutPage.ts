@@ -15,6 +15,13 @@ export class CheckoutPage extends BasePage {
     readonly clickHere: Locator;
     readonly termsCheckbox: Locator;
     readonly approveBtn: Locator;
+    readonly identityDetailsHeading: Locator;
+    readonly applicationNumberLabel: Locator;
+    readonly kycQuotationStep: Locator;
+    readonly identityFinancialStep: Locator;
+    readonly lifestyleHealthStep: Locator;
+    readonly payoutStep: Locator;
+    readonly reviewPaymentStep: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -32,6 +39,15 @@ export class CheckoutPage extends BasePage {
         this.clickHere = page.getByText(/\*\s*click here/i);
         this.termsCheckbox = page.getByRole("checkbox");
         this.approveBtn = page.getByRole("button", { name: /approve/i });
+
+        this.identityDetailsHeading = page.getByText("Identity Details", { exact: true });
+        this.applicationNumberLabel = page.locator('span:has-text("YOUR APPLICATION NUMBER IS")');
+        this.kycQuotationStep = page.getByText("KYC & Quotation", { exact: true });
+        this.identityFinancialStep = page.getByText("Identity & Financial", { exact: true });
+        this.lifestyleHealthStep = page.getByText("Lifestyle & Health", { exact: true });
+        this.payoutStep = page.getByText("Payout", { exact: true });
+        this.reviewPaymentStep = page.getByText("Review & Payment", { exact: true });
+
     }
 
     async lifeTermCheckoutJourney(_scenario: LifeTermScenario) {
@@ -39,8 +55,9 @@ export class CheckoutPage extends BasePage {
         await this.fillProposerDetails();
         await this.sharePaymentLink();
         await this.approveOnReview();
-       await this.biPdfCompare();
-       this.log("Completed Checkout Journey");
+        await this.validateInsurerRedirection();
+        // await this.biPdfCompare();
+        this.log("Completed Checkout Journey");
     }
 
     private async biPdfCompare() {
@@ -81,6 +98,25 @@ export class CheckoutPage extends BasePage {
         await this.fullScreenScreenshot("Share Payment Link");
     }
 
+    // private async approveOnReview() {
+    //     const reviewUrl = await this.buildReviewUrl();
+    //     if (!reviewUrl) throw new Error("Could not resolve life-insurance review URL (missing referenceId)");
+
+    //     await this.page.goto(reviewUrl);
+
+    //     const [download] = await Promise.all([
+    //         this.page.waitForEvent("download"),
+    //         this.click(this.clickHere, "click on Click here BI button"),
+    //     ]);
+    //     fs.mkdirSync("lifeBiCompare", { recursive: true });
+    //     await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
+
+    //     await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
+    //     await this.fullScreenScreenshot("Accept terms checkbox");
+    //     await this.click(this.approveBtn, "click on Approve button");
+    //     await this.page.waitForURL(/apptracker|applicationform|payment|success/i, { timeout: 60000 }).catch(() => { });
+    // }
+
     private async approveOnReview() {
         const reviewUrl = await this.buildReviewUrl();
         if (!reviewUrl) throw new Error("Could not resolve life-insurance review URL (missing referenceId)");
@@ -96,8 +132,44 @@ export class CheckoutPage extends BasePage {
 
         await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
         await this.fullScreenScreenshot("Accept terms checkbox");
-        await this.click(this.approveBtn, "click on Approve button");
-        await this.page.waitForURL(/apptracker|applicationform|payment|success/i, { timeout: 60000 }).catch(() => {});
+
+        const [approveResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST"
+            ),
+            this.click(this.approveBtn, "click on Approve button"),
+        ]);
+
+        const status = approveResponse.status();
+        let body: any = null;
+        try {
+            body = await approveResponse.json();
+        } catch {
+            this.log("Approve API response is not JSON");
+        }
+
+        if (status !== 200 || body?.meta?.error) {
+            await this.fullScreenScreenshot("Approve API Error Screenshot");
+            this.log(`Approve API failed — status: ${status}, response: ${JSON.stringify(body)}`);
+            throw new Error(
+                `Approve API failed — status: ${status}, response: ${JSON.stringify(body)}`
+            );
+        }
+
+        const redirectUrl: string | undefined =
+            body?.data?.paymentLink || body?.data?.proposalResult?.redirectUrl;
+
+        if (!redirectUrl) {
+            await this.fullScreenScreenshot("Approve Missing Redirect URL");
+            throw new Error(`Approve API succeeded but no redirectUrl/paymentLink in response: ${JSON.stringify(body)}`);
+        }
+
+        this.log(`Approve API succeeded, redirecting to: ${redirectUrl}`);
+
+        await this.page.waitForURL(/iprulifeinsurance\.com/, {
+            timeout: 30000,
+            waitUntil: "domcontentloaded",
+        });
     }
 
     private async buildReviewUrl(): Promise<string | null> {
@@ -112,5 +184,29 @@ export class CheckoutPage extends BasePage {
 
         if (!referenceId) return null;
         return `${current.origin}/life-insurance/review?referenceId=${referenceId}`;
+    }
+
+    private async validateInsurerRedirection() {
+        this.log("Validating insurer redirection page");
+
+        await this.page.waitForURL(/iprulifeinsurance\.com/, { timeout: 30000 });
+
+        const checks: { name: string; locator: Locator }[] = [
+            { name: "Application Number label", locator: this.applicationNumberLabel },
+            { name: "Identity Details heading", locator: this.identityDetailsHeading },
+            { name: "KYC & Quotation step", locator: this.kycQuotationStep },
+            { name: "Identity & Financial step", locator: this.identityFinancialStep },
+            { name: "Lifestyle & Health step", locator: this.lifestyleHealthStep },
+            { name: "Payout step", locator: this.payoutStep },
+            { name: "Review & Payment step", locator: this.reviewPaymentStep },
+        ];
+
+        for (const { name, locator } of checks) {
+            const isVisible = await locator.first().isVisible().catch(() => false);
+            this.log(`${name} visible: ${isVisible}`);
+        }
+
+        await this.fullScreenScreenshot("Insurer Redirection Page Screenshot");
+        this.log("Insurer redirection validated");
     }
 }

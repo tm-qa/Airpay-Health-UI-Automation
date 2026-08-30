@@ -12,7 +12,7 @@
     "test:allure": "npm run test && npm run allure:generate && npm run allure:open",
     "test:allure:health": "npx playwright test tests/health.spec.ts --headed; npm run allure:generate; npm run allure:open",
     "test:health:headed": "npx playwright test tests/health.spec.ts --headed --workers=1",
-    "test:lifeterm": "npx playwright test tests/lifeterm.spec.ts --headed; npm run allure:generate; npm run allure:open",
+    "test:lifeterm": "rm -rf allure-results allure-report && npx playwright test tests/lifeterm.spec.ts --workers=2 --reporter=line,allure-playwright; npm run allure:generate; npm run allure:open",
     "test:lifeterm:headed": "npx playwright test tests/lifeterm.spec.ts --headed --workers=1"
   },
   "keywords": [],

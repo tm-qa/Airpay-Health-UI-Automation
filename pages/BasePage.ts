@@ -10,7 +10,7 @@ export class BasePage {
         console.log(`[${timestampIST}] : AUTOMATION_LOG: ==> ${action}`);
         if (!takeSnap) return;
         await step(action, async () => {
-            await attachment(`${action} - Screenshot`, await this.page.screenshot({ fullPage }), "image/png");
+            await attachment(`${action} - Screenshot`, await this.page.screenshot({ fullPage, animations: "disabled"}), "image/png");
         });
     }
 

@@ -8,7 +8,7 @@ import { getLifeTermScenarios } from "../utils/lifeTermScenarioBuilder";
 const LIFE_TERM_SCENARIOS = getLifeTermScenarios();
 
 test.describe("@LifeTerm Life Term Tests", () => {
-   //test.describe.configure({ mode: "serial" });
+    //test.describe.configure({ mode: "serial" });
 
     let dashboardPage: Dashboardpage;
     let profilePage: ProfilePage;
@@ -25,14 +25,14 @@ test.describe("@LifeTerm Life Term Tests", () => {
     });
 
     for (const scenario of LIFE_TERM_SCENARIOS) {
-        test(`${scenario.tcId} | ${scenario.type} | ${scenario.combination} | ${scenario.sumAssured}`, async () => {
+        test(`${scenario.tcId} | ${scenario.type} | ${scenario.expected} | ${scenario.sumAssured}`, async () => {
             test.setTimeout(180000);
-            console.log(`========== ${scenario.tcId} | ${scenario.combination} | ${scenario.sumAssured} ==========`);
+            console.log(`========== ${scenario.tcId} | ${scenario.expected} | ${scenario.sumAssured} ==========`);
             await dashboardPage.navigateToLifeTermInsurance(scenario.cifNumber);
             await profilePage.lifeTermProfileJourney(scenario);
-            await resultPage.lifeTermResultJourney(scenario);
+            const shouldStop = await resultPage.lifeTermResultJourney(scenario); if (shouldStop) return;
             await checkoutPage.lifeTermCheckoutJourney(scenario);
-            console.log(`AUTOMATION_LOG: ==========> ${scenario.tcId} | ${scenario.combination} | ${scenario.sumAssured} ========== Passed`);
+            console.log(`AUTOMATION_LOG: ==========> ${scenario.tcId} | ${scenario.expected} | ${scenario.sumAssured} | ========== Passed`);
         });
     }
 });

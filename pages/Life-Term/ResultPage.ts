@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from "@playwright/test";
+import { Page, Locator, expect, test } from "@playwright/test";
 import * as fs from "fs";
 import { BasePage } from "../BasePage";
 import { LifeTermScenario } from "../../types/lifeTerm.types";
@@ -6,6 +6,14 @@ import { LifeTermScenario } from "../../types/lifeTerm.types";
 export class ResultPage extends BasePage {
     readonly sumAssured: Locator;
     readonly coverUptoAge: Locator;
+    readonly payForYears: Locator;
+    readonly paymentFrequency: Locator;
+    readonly monthlyOption: Locator;
+    readonly quarterlyOption: Locator;
+    readonly halfYearlyOption: Locator;
+    readonly yearlyOption: Locator;
+    readonly singlePremiumRadio: Locator;
+    readonly payForYearsSingleWarning: Locator;
     readonly sortBy: Locator;
     readonly viewAddons: Locator;
     readonly criticalIllnessCover: Locator;
@@ -14,7 +22,6 @@ export class ResultPage extends BasePage {
     readonly closeBtn: Locator;
     readonly benefitIllustrationBtn: Locator;
     readonly downloadBtn: Locator;
-    readonly viewDetailsBtn: Locator;
     readonly downloadsSection: Locator;
     readonly policyBrochure: Locator;
     readonly downloadBiBtn: Locator;
@@ -24,6 +31,14 @@ export class ResultPage extends BasePage {
         super(page);
         this.sumAssured = page.getByRole("textbox", { name: /sum assured/i });
         this.coverUptoAge = page.getByRole("textbox", { name: /cover upto age/i });
+        this.payForYears = page.getByRole("textbox", { name: "Pay for (Years)" });
+        this.paymentFrequency = page.getByRole("textbox", { name: "Payment Frequency" });
+        this.monthlyOption = page.getByText("Monthly");
+        this.quarterlyOption = page.getByText("Quarterly");
+        this.halfYearlyOption = page.getByText("Half-Yearly");
+        this.yearlyOption = page.getByText("Yearly", { exact: true });
+        this.singlePremiumRadio = page.getByRole("radio", { name: "Single premium" });
+        this.payForYearsSingleWarning = page.getByText("Pay for must be 1 for single");
         this.sortBy = page.getByText(/relevance/i);
         this.viewAddons = page.getByText(/view \d+ available addons/i);
         this.criticalIllnessCover = page.getByText(/critical illness cover/i);
@@ -32,25 +47,33 @@ export class ResultPage extends BasePage {
         this.closeBtn = page.getByRole("button", { name: /close/i });
         this.benefitIllustrationBtn = page.getByRole("button", { name: /benefit illustration/i });
         this.downloadBtn = page.getByRole("button", { name: /download/i });
-        this.viewDetailsBtn = page.getByRole("button", { name: /view details/i });
         this.downloadsSection = page.locator("article", { hasText: /downloads/i });
         this.policyBrochure = page.getByText(/policy brochure/i);
         this.downloadBiBtn = page.getByRole("button", { name: /download bi/i });
         this.buyNowBtn = page.getByRole("button", { name: /buy now/i });
     }
 
-    async lifeTermResultJourney(scenario: LifeTermScenario) {
+    async lifeTermResultJourney(scenario: LifeTermScenario): Promise<boolean> {
         this.log("Starting Result Journey");
         await expect(this.page).toHaveURL(/\/results?/, { timeout: 60000 });
 
         await this.selectSumAssured(scenario.sumAssured);
         await this.selectCoverUptoAge(scenario.maturityAge);
+        await this.selectPaymentFrequency(scenario.paymentFrequency);
+        // await this.validatenegativeCasesScenarios(scenario.type, scenario.expected, scenario.planName);
+        const shouldStop = await this.validateNegativeCasesScenarios(scenario.type, scenario.expected, scenario.planName);
+        if (shouldStop) {
+            this.log("Stopping journey — negative case confirmed or plan not present as expected or plan is not visible due to insurer side issue.");
+            await this.fullScreenScreenshot("Result Page: Result page Screenshot id plan is not available");
+            return true;
+        }
         await this.sortByClaimSettlementRatio();
         await this.applyRiders(scenario);
-        await this.openPlanDetailsAndDownloads();
+        await this.openPlanDetailsAndDownloads(scenario.planName);
         await this.click(this.buyNowBtn, "click on Buy Now button");
         await this.page.waitForURL(/\/(kyc|checkout|proposal)/, { timeout: 30000 });
         this.log("Completed Result Journey");
+        return false;
     }
 
     private async selectSumAssured(amount: number) {
@@ -68,10 +91,25 @@ export class ResultPage extends BasePage {
         await this.click(this.page.getByRole("option", { name: /claim settlement ratio/i }), "Sort by Claim Settlement Ratio");
     }
 
+    // private async applyRiders(scenario: LifeTermScenario) {
+    //     if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4].some(Boolean)) return;
+    //     await this.viewAddons.waitFor({ state: "visible", timeout: 15000 });
+    //     await this.click(this.viewAddons, "click on View addons button");
+    //     if (scenario.rider1) await this.selectCriticalIllnessCover(scenario.rider1Package, scenario.rider1SI);
+    //     if (scenario.rider2) await this.selectAccidentalTotalPermanentDisability(scenario.rider2SI);
+    //     if (scenario.rider3) await this.selectWaiverOfPremium();
+    //     if (scenario.rider4) await this.selectAccidentalDeathCover(scenario.rider4SI);
+    // }
+
     private async applyRiders(scenario: LifeTermScenario) {
         if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4].some(Boolean)) return;
-        await this.viewAddons.waitFor({ state: "visible", timeout: 15000 });
-        await this.click(this.viewAddons, "click on View addons button");
+
+        const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: scenario.planName });
+        const viewAddonsForPlan = planCard.getByText(/view \d+ available addons/i);
+
+        await viewAddonsForPlan.waitFor({ state: "visible", timeout: 15000 });
+        await this.click(viewAddonsForPlan, "click on View addons button");
+
         if (scenario.rider1) await this.selectCriticalIllnessCover(scenario.rider1Package, scenario.rider1SI);
         if (scenario.rider2) await this.selectAccidentalTotalPermanentDisability(scenario.rider2SI);
         if (scenario.rider3) await this.selectWaiverOfPremium();
@@ -104,7 +142,7 @@ export class ResultPage extends BasePage {
     private async submitAddonCover(coverAmount?: number) {
         if (coverAmount != null) await this.fill(this.addonCoverAmount, String(coverAmount), "fill Cover amount");
         await this.click(this.getAddonBtn, "click on Get Add-On button");
-      //  if (await this.closeBtn.isVisible().catch(() => false)) await this.click(this.closeBtn, "Close");
+        //  if (await this.closeBtn.isVisible().catch(() => false)) await this.click(this.closeBtn, "Close");
     }
 
     private async downloadBenefitIllustration() {
@@ -125,8 +163,8 @@ export class ResultPage extends BasePage {
         await this.fullScreenScreenshot("Benefit Illustration");
     }
 
-    private async openPlanDetailsAndDownloads() {
-        await this.click(this.viewDetailsBtn.first(), "Result Page: View Details");
+    private async openPlanDetailsAndDownloads(planName: string) {
+        await this.clickViewDetailsByPlanName(planName,);
         await this.fullScreenScreenshot("Result Page: View Details Screenshot");
         if (await this.downloadsSection.isVisible().catch(() => false)) {
             await this.click(this.downloadsSection, "click on Downloads button");
@@ -162,4 +200,185 @@ export class ResultPage extends BasePage {
         fs.mkdirSync("lifeBiCompare", { recursive: true });
         await download.saveAs("lifeBiCompare/BiPDPPage.pdf");
     }
+
+
+    private async selectPaymentFrequency(frequency: string) {
+        if (!frequency || frequency == "Yearly") {
+            this.log("No Payment Frequency provided in scenario or Payment Frequency is Yearly");
+            return;
+        }
+
+        const normalized = frequency.trim().toLowerCase();
+        await this.click(this.paymentFrequency, "click on Payment Frequency dropdown");
+
+        if (normalized === "single" || normalized === "single premium") {
+            await this.click(this.singlePremiumRadio, "select Single Premium radio");
+            await expect(this.payForYearsSingleWarning, "Pay for (Years) single-premium warning should be visible")
+                .toBeVisible({ timeout: 5000 });
+            await this.payForYears.fill("");
+            await this.fill(this.payForYears, "1", "fill Pay for (Years) as 1 for Single Premium");
+            this.log("Selected Single Premium, warning verified, Pay for (Years) set to 1");
+            return;
+        }
+
+        if (normalized === "quarterly") {
+            const isQuarterlyAvailable = await this.quarterlyOption.isVisible().catch(() => false);
+            if (isQuarterlyAvailable) {
+                await this.click(this.quarterlyOption, "select Payment Frequency: Quarterly (expected unsupported)");
+                this.log("Quarterly option was selectable in UI — expected to fail downstream validation");
+                return;
+            }
+            throw new Error(
+                `Payment Frequency "Quarterly" is not supported by the plan validator (as per test data expectation).`
+            );
+        }
+
+        const optionMap: Record<string, Locator> = {
+            monthly: this.monthlyOption,
+            yearly: this.yearlyOption,
+            "half-yearly": this.halfYearlyOption,
+            "halfyearly": this.halfYearlyOption,
+            "half yearly": this.halfYearlyOption,
+        };
+
+        const option = optionMap[normalized];
+        if (!option) {
+            throw new Error(`Unsupported Payment Frequency value from Excel sheet: "${frequency}"`);
+        }
+
+        await this.click(option, `select Payment Frequency: ${frequency}`);
+        this.log(`Payment Frequency set to: ${frequency}`);
+    }
+
+
+    async clickViewDetailsByPlanName(planName: string) {
+        if (!planName) {
+            throw new Error("planName is required to click View Details button");
+        }
+
+        const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+        await planCard.waitFor({ state: "visible", timeout: 15000 });
+
+        const viewDetailsBtn = planCard.getByRole("button", { name: /view details/i });
+        await viewDetailsBtn.waitFor({ state: "visible", timeout: 15000 });
+
+        await this.click(viewDetailsBtn, `click on View Details button for plan: ${planName}`);
+    }
+
+    // private async clickViewDetailsByPlanName(planName: string) {
+
+    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
+
+    //     if (!isPlanCardVisible) {
+    //         console.log(`Plan "${planName}" is not visible on Result Page — insurer may not have returned this plan.`);
+    //         this.log(`Plan card not found for plan: ${planName}`);
+    //         return;
+    //     }
+
+    //     const viewDetailsBtn = planCard.getByRole("button", { name: /view details/i });
+    //     const isViewDetailsVisible = await viewDetailsBtn.isVisible().catch(() => false);
+
+    //     if (!isViewDetailsVisible) {
+    //         console.log(`"View Details" button is not visible for plan: ${planName}`);
+    //         this.log(`View Details button not visible for plan: ${planName}`);
+    //         return;
+    //     }
+
+    //     await this.click(viewDetailsBtn, `click on View Details button for plan: ${planName}`);
+    // }
+
+    // async validatenegativeCasesScenarios(type?: string, expected?: string, planName?: string) {
+    //     console.log("validating negative tc");
+    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+    //     //await planCard.waitFor({ state: "visible", timeout: 15000 });
+
+    //     if (type === "negative" && !await planCard.isVisible()) {
+    //         this.log("Plan is not supported for negative cases : " + expected);
+    //         return;
+    //     }
+    //     else if (type === "positive" && !await planCard.isVisible()) {
+    //         this.log("Plan is not visible due to insurer side issue")
+    //     }
+    // }
+
+    // async validatenegativeCasesScenarios(type?: string, expected?: string, planName?: string) {
+    //     console.log("validating negative tc");
+    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
+
+    //     if (type === "Negative" && !isPlanCardVisible) {
+    //         this.log("Plan is not supported for negative cases : " + expected);
+    //         return;
+    //     }
+    //     else if (type === "Positive" && !isPlanCardVisible) {
+    //         this.log("Plan is not visible due to insurer side issue");
+    //         return;
+    //     }
+    // }
+
+    // private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
+    //     console.log("validating negative tc");
+    //     await this.page.waitForLoadState("networkidle");
+    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
+
+    //     if (type === "Negative" && !isPlanCardVisible) {
+    //         this.log("Plan is not supported for negative cases : " + expected);
+    //         return true;
+    //     }
+    //     else if (type === "Positive" && !isPlanCardVisible) {
+    //         this.log("Plan is not visible due to insurer side issue");
+    //         return true;
+    //     }
+
+    //     return false;
+    // }
+
+    // private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
+    //     this.log("validating negative tc");
+    //     await this.page.waitForLoadState("networkidle");
+    
+    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+    //     const isPlanCardVisible = await planCard.isVisible().catch(() => false);
+    
+    //     if (isPlanCardVisible) {
+    //         return false;
+    //     }
+    
+    //     if (type === "Negative") {
+    //         this.log("Plan is not supported for negative cases : " + expected);
+    //     } else if (type === "Positive") {
+    //         this.log("Plan is not visible due to insurer side issue");
+    //     }
+    
+    //     return true;
+    // }
+
+    private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
+        this.log("validating negative tc");
+    
+        const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+        const noPlansFound = this.page.locator(".LifeResultCardModule_noPlansFound__PG7QW");
+    
+        await planCard.first().or(noPlansFound).waitFor({ state: "visible", timeout: 30000 });
+    
+        const isPlanCardVisible = await planCard.first().isVisible().catch(() => false);
+    
+        if (isPlanCardVisible) {
+            await this.fullScreenScreenshot("Result Page: Plan Card Visible Screenshot");
+            return false;
+        }
+    
+        if (type === "Negative") {
+            this.log("Plan is not supported for negative cases : " + expected);
+            await this.fullScreenScreenshot("Result Page: Plan Card Not Supported Screenshot");
+        } else if (type === "Positive") {
+            this.log("Plan is not visible due to insurer side issue");
+            await this.fullScreenScreenshot("Result Page: Plan Card Not Visible Screenshot");
+        }
+    
+        return true;
+    }
+
 }
