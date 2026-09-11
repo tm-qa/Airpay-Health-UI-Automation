@@ -130,7 +130,9 @@ export class CheckoutPage extends BasePage {
 
         const [approveResponse] = await Promise.all([
             this.page.waitForResponse(
-                (res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST"
+                //(res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST"
+                (res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST" 
+                && (this.log(`Approve API Request: ${res.request().postData()}`), true)
             ),
             this.click(this.approveBtn, "click on Approve button"),
         ]);
