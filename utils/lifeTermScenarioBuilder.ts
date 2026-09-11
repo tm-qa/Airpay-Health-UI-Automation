@@ -50,5 +50,8 @@ export function getLifeTermScenarios(): LifeTermScenario[] {
             rider4SI: optionalNumber(row.Rider4SI),
             expected: text(row.Expected),
             whyNegative: text(row.WhyNegative),
+            occupation: text(row.Occupation),
+            educationalQualification: text(row.EducationalQualification),
+            income: text(row.Income),
         }));
 }

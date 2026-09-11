@@ -3,6 +3,9 @@ export interface LifeTermScenario {
     combination: string;
     type: string;
     cifNumber: string;
+    occupation: string;
+    educationalQualification: string;
+    income: string;
     sumAssured: number;
     sumAssuredLabel: string;
     coverAge: number;

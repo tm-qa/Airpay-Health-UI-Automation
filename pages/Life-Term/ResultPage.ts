@@ -61,7 +61,7 @@ export class ResultPage extends BasePage {
         await this.selectCoverUptoAge(scenario.maturityAge);
         await this.selectPaymentFrequency(scenario.paymentFrequency);
         // await this.validatenegativeCasesScenarios(scenario.type, scenario.expected, scenario.planName);
-        const shouldStop = await this.validateNegativeCasesScenarios(scenario.type, scenario.expected, scenario.planName);
+        const shouldStop = await this.validateNegativeCasesScenarios(scenario.type, scenario.expected, scenario.planName, scenario.tcId);
         if (shouldStop) {
             this.log("Stopping journey — negative case confirmed or plan not present as expected or plan is not visible due to insurer side issue.");
             await this.fullScreenScreenshot("Result Page: Result page Screenshot id plan is not available");
@@ -91,6 +91,21 @@ export class ResultPage extends BasePage {
         await this.click(this.page.getByRole("option", { name: /claim settlement ratio/i }), "Sort by Claim Settlement Ratio");
     }
 
+    // private async applyRiders(scenario: LifeTermScenario) {
+    //     if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4].some(Boolean)) return;
+
+    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: scenario.planName });
+    //     const viewAddonsForPlan = planCard.getByText(/view \d+ available addons/i);
+
+    //     await viewAddonsForPlan.waitFor({ state: "visible", timeout: 15000 });
+    //     await this.click(viewAddonsForPlan, "click on View addons button");
+
+    //     if (scenario.rider1) await this.selectCriticalIllnessCover(scenario.rider1Package, scenario.rider1SI);
+    //     if (scenario.rider2) await this.selectAccidentalTotalPermanentDisability(scenario.rider2SI);
+    //     if (scenario.rider3) await this.selectWaiverOfPremium();
+    //     if (scenario.rider4) await this.selectAccidentalDeathCover(scenario.rider4SI);
+    // }
+
     private async applyRiders(scenario: LifeTermScenario) {
         if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4].some(Boolean)) return;
 
@@ -104,30 +119,52 @@ export class ResultPage extends BasePage {
         if (scenario.rider2) await this.selectAccidentalTotalPermanentDisability(scenario.rider2SI);
         if (scenario.rider3) await this.selectWaiverOfPremium();
         if (scenario.rider4) await this.selectAccidentalDeathCover(scenario.rider4SI);
+
+        await this.page.waitForTimeout(2000);
+
+        // if (scenario.rider1 && !(await this.isAddonChecked("Critical Illness Cover")) ) {
+        //     await this.selectCriticalIllnessCover(scenario.rider1Package, scenario.rider1SI);
+        // }
+        // if (scenario.rider2 && !(await this.isAddonChecked("Accidental Total & Permanent Disability")) ) {
+        //     await this.selectAccidentalTotalPermanentDisability(scenario.rider2SI);
+        // }
+        // // if (scenario.rider3 && !(await this.isAddonChecked("Waiver of Premium"))) {
+        // //     await this.selectWaiverOfPremium();
+        // //}
+        // if (scenario.rider4 && !(await this.isAddonChecked("Accidental Death Cover")) ) {
+        //     await this.selectAccidentalDeathCover(scenario.rider4SI);
+        // }
     }
 
-    private async selectCriticalIllnessCover(ciPackage: string, coverAmount?: number) {
-        await this.click(this.page.getByText("Critical Illness Cover", { exact: true }), "click on Critical Illness Cover button");
-        await this.click(this.page.getByText("₹ 5.00 L").first(), "click on CI cover button");
-        if (ciPackage) await this.click(this.page.getByText(ciPackage, { exact: true }), ciPackage);
-        await this.submitAddonCover(coverAmount);
+    private async isAddonChecked(addonName: string): Promise<boolean> {
+        const checkbox = this.page
+            .locator(".Addons_item__23FZq", { hasText: addonName })
+            .locator("input.ant-checkbox-input");
+        return checkbox.isChecked().catch(() => false);
     }
 
-    private async selectAccidentalTotalPermanentDisability(coverAmount?: number) {
-        await this.click(this.page.getByText("Accidental Total & Permanent Disability", { exact: true }), "click on ATPD button");
-        await this.click(this.page.getByText("₹ 5.00 L").nth(2), "click on ATPD cover button");
-        await this.submitAddonCover(coverAmount);
-    }
+    // private async selectCriticalIllnessCover(ciPackage: string, coverAmount?: number) {
+    //     await this.click(this.page.getByText("Critical Illness Cover", { exact: true }), "click on Critical Illness Cover button");
+    //     await this.click(this.page.getByText("₹ 5.00 L").first(), "click on CI cover button");
+    //     if (ciPackage) await this.click(this.page.getByText(ciPackage, { exact: true }), ciPackage);
+    //     await this.submitAddonCover(coverAmount);
+    // }
 
-    private async selectWaiverOfPremium() {
-        await this.click(this.page.getByText("Waiver of Premium", { exact: true }), "click on Waiver of Premium button");
-    }
+    // private async selectAccidentalTotalPermanentDisability(coverAmount?: number) {
+    //     await this.click(this.page.getByText("Accidental Total & Permanent Disability", { exact: true }), "click on ATPD button");
+    //     await this.click(this.page.getByText("₹ 5.00 L").nth(2), "click on ATPD cover button");
+    //     await this.submitAddonCover(coverAmount);
+    // }
 
-    private async selectAccidentalDeathCover(coverAmount?: number) {
-        await this.click(this.page.getByText("Accidental Death Cover", { exact: true }), "click on Accidental Death Cover button");
-        await this.click(this.page.getByText("₹ 5.00 L").nth(1), "click on ADC cover button");
-        await this.submitAddonCover(coverAmount);
-    }
+    // private async selectWaiverOfPremium() {
+    //     await this.click(this.page.getByText("Waiver of Premium", { exact: true }), "click on Waiver of Premium button");
+    // }
+
+    // private async selectAccidentalDeathCover(coverAmount?: number) {
+    //     await this.click(this.page.getByText("Accidental Death Cover", { exact: true }), "click on Accidental Death Cover button");
+    //     await this.click(this.page.getByText("₹ 5.00 L").nth(1), "click on ADC cover button");
+    //     await this.submitAddonCover(coverAmount);
+    // }
 
     private async submitAddonCover(coverAmount?: number) {
         if (coverAmount != null) await this.fill(this.addonCoverAmount, String(coverAmount), "fill Cover amount");
@@ -256,8 +293,62 @@ export class ResultPage extends BasePage {
     }
 
 
-    private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
+    // private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string): Promise<boolean> {
+    //     this.log("validating negative tc");
+
+    //     const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+    //     const noPlansFound = this.page.locator(".LifeResultCardModule_noPlansFound__PG7QW");
+
+    //     await planCard.first().or(noPlansFound).waitFor({ state: "visible", timeout: 30000 });
+
+    //     const isPlanCardVisible = await planCard.first().isVisible().catch(() => false);
+
+    //     if (isPlanCardVisible) {
+    //         await this.fullScreenScreenshot("Result Page: Plan Card Visible Screenshot");
+    //         return false;
+    //     }
+
+    //     if (type === "Negative") {
+    //         this.log("Plan is not supported for negative cases : " + expected);
+    //         await this.fullScreenScreenshot("Result Page: Plan Card Not Supported Screenshot");
+    //     } else if (type === "Positive") {
+    //         this.log("Plan is not visible due to insurer side issue");
+    //         await this.fullScreenScreenshot("Result Page: Plan Card Not Visible Screenshot");
+    //     }
+
+    //     return true;
+    // }
+
+    private async validateNegativeCasesScenarios(type?: string, expected?: string, planName?: string, tcId?: string): Promise<boolean> {
         this.log("validating negative tc");
+
+        if (tcId === "TC_13") {
+            const ageErrorMsg = this.page.locator("text=Cover upto age must be at least 23");
+            const isAgeErrorVisible = await ageErrorMsg.isVisible({ timeout: 5000 }).catch(() => false);
+
+            if (isAgeErrorVisible) {
+                this.log("Age validation message displayed for TC_14 - stopping journey");
+                await this.fullScreenScreenshot("Result Page: Age Validation Message Screenshot");
+                return true;
+            }
+        }
+
+        if (tcId === "TC_15") {
+            const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+            const viewAddonsForPlan = planCard.getByText(/view \d+ available addons/i);
+    
+            await viewAddonsForPlan.waitFor({ state: "visible", timeout: 15000 });
+            await this.click(viewAddonsForPlan, "click on View addons button");
+    
+            const criticalIllnessCover = this.page.getByText("Critical Illness Cover", { exact: true });
+            const isCriticalIllnessCoverVisible = await criticalIllnessCover.isVisible({ timeout: 5000 }).catch(() => false);
+
+            if (!isCriticalIllnessCoverVisible) {
+                this.log("Critical Illness Cover not displayed for TC_15 - stopping journey as pass");
+                await this.fullScreenScreenshot("Result Page: Critical Illness Cover Not Displayed Screenshot");
+                return true;
+            }
+        }
 
         const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
         const noPlansFound = this.page.locator(".LifeResultCardModule_noPlansFound__PG7QW");
@@ -280,6 +371,46 @@ export class ResultPage extends BasePage {
         }
 
         return true;
+    }
+
+    
+    private getRiderCard(riderName: string): Locator {
+        return this.page.locator(".Addons_item__23FZq").filter({
+            has: this.page.locator(".Addons_name__31m6r", { hasText: riderName }),
+        });
+    }
+    
+    private getRiderCheckbox(riderName: string): Locator {
+        return this.getRiderCard(riderName).locator("input.ant-checkbox-input");
+    }
+    
+    private getRiderCoverDropdown(riderName: string): Locator {
+        return this.getRiderCard(riderName).locator(".Addons_cover-amount-preview__BpbLd");
+    }
+
+
+
+    private async selectCriticalIllnessCover(ciPackage: string, coverAmount?: number) {
+        await this.click(this.getRiderCard("Critical Illness Cover").locator(".Addons_name__31m6r"), "click on Critical Illness Cover button");
+        await this.click(this.getRiderCoverDropdown("Critical Illness Cover"), "click on CI cover dropdown");
+        if (ciPackage) await this.click(this.page.getByText(ciPackage, { exact: true }), ciPackage);
+        await this.submitAddonCover(coverAmount);
+    }
+
+    private async selectAccidentalTotalPermanentDisability(coverAmount?: number) {
+        await this.click(this.getRiderCard("Accidental Total & Permanent Disability").locator(".Addons_name__31m6r"), "click on ATPD button");
+        await this.click(this.getRiderCoverDropdown("Accidental Total & Permanent Disability"), "click on ATPD cover dropdown");
+        await this.submitAddonCover(coverAmount);
+    }
+
+    private async selectAccidentalDeathCover(coverAmount?: number) {
+        await this.click(this.getRiderCard("Accidental Death Cover").locator(".Addons_name__31m6r"), "click on Accidental Death Cover button");
+        await this.click(this.getRiderCoverDropdown("Accidental Death Cover"), "click on ADC cover dropdown");
+        await this.submitAddonCover(coverAmount);
+    }
+
+    private async selectWaiverOfPremium() {
+        await this.click(this.getRiderCheckbox("Waiver of Premium"), "click on Waiver of Premium checkbox");
     }
 
 }

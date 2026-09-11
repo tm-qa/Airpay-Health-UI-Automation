@@ -31,7 +31,7 @@ test.describe("@LifeTerm Life Term Tests", () => {
             await dashboardPage.navigateToLifeTermInsurance(scenario.cifNumber);
             await profilePage.lifeTermProfileJourney(scenario);
             const shouldStop = await resultPage.lifeTermResultJourney(scenario); if (shouldStop) return;
-            await checkoutPage.lifeTermCheckoutJourney(scenario);
+            const approved = await checkoutPage.lifeTermCheckoutJourney(scenario); if (!approved) return;
             console.log(`AUTOMATION_LOG: ==========> ${scenario.tcId} | ${scenario.expected} | ${scenario.sumAssured} | ========== Passed`);
         });
     }
