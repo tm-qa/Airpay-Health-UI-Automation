@@ -64,7 +64,7 @@ export class CheckoutPage extends BasePage {
             return false;
         }
         await this.validateInsurerRedirection();
-        // await this.biPdfCompare();
+        await this.biPdfCompare();
         this.log("Completed Checkout Journey");
         return true;
     }
