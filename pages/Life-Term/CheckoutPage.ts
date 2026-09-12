@@ -102,30 +102,6 @@ export class CheckoutPage extends BasePage {
         await this.click(this.continueBtn, "click on Continue button");
     }
 
-    // private async sharePaymentLink() {
-    //     await this.click(this.sharePaymentLinkBtn, "click on Share Payment Link button");
-    //     if (await this.copyLink.isVisible().catch(() => false)) {
-    //         await this.click(this.copyLink, "click on Copy Link button");
-    //     }
-    //     await this.fullScreenScreenshot("Share Payment Link");
-    // }
-
-    // private async sharePaymentLink() {
-    //     await Promise.all([
-    //         this.page.waitForResponse(
-    //             res => res.url().includes("/products/life/proposals") &&
-    //                   res.request().method() === "POST"
-    //         ),
-    //         this.click(this.sharePaymentLinkBtn, "click on Share Payment Link button"),
-    //     ]);
-
-    //     // if (await this.copyLink.isVisible().catch(() => false)) {
-    //         await this.click(this.copyLink, "click on Copy Link button");
-    //     // }
-
-    //     await this.fullScreenScreenshot("Share Payment Link");
-    // }
-
     private async sharePaymentLink(): Promise<string> {
         const [response] = await Promise.all([
             this.page.waitForResponse(
@@ -149,66 +125,6 @@ export class CheckoutPage extends BasePage {
         return `${origin}/life-insurance/review?referenceId=${referenceId}`;
     }
 
-
-    // private async approveOnReview(): Promise<boolean> {
-    //     const reviewUrl = await this.buildReviewUrl();
-    //     if (!reviewUrl) throw new Error("Could not resolve life-insurance review URL (missing referenceId)");
-
-    //     await this.page.goto(reviewUrl);
-
-    //     const [download] = await Promise.all([
-    //         this.page.waitForEvent("download"),
-    //         this.click(this.clickHere, "click on Click here BI button"),
-    //     ]);
-    //     fs.mkdirSync("lifeBiCompare", { recursive: true });
-    //     await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
-
-    //     await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
-    //     await this.fullScreenScreenshot("Accept terms checkbox");
-
-    //     const [approveResponse] = await Promise.all([
-    //         this.page.waitForResponse(
-    //             //(res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST"
-    //             (res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST"
-    //                 && (this.log(`Approve API Request: ${res.request().postData()}`), true)
-    //         ),
-    //         this.click(this.approveBtn, "click on Approve button"),
-    //     ]);
-
-    //     // const status = approveResponse.status();
-    //     // let body: any = null;
-    //     // try {
-    //     //     body = await approveResponse.json();
-    //     // } catch {
-    //     //     this.log("Approve API response is not JSON");
-    //     // }
-
-    //     // if (status !== 200 || body?.meta?.error) {
-    //     //     await this.fullScreenScreenshot("Approve API Error Screenshot");
-    //     //     this.log(`Approve API failed — status: ${status}, response: ${JSON.stringify(body)}`);
-    //     //     // throw new Error(
-    //     //     //     `Approve API failed — status: ${status}, response: ${JSON.stringify(body)}`
-    //     //     // );
-    //     //     return false;
-    //     // }
-
-    //     // const redirectUrl: string | undefined =
-    //     //     body?.data?.paymentLink || body?.data?.proposalResult?.redirectUrl;
-
-    //     // if (!redirectUrl) {
-    //     //     await this.fullScreenScreenshot("Approve Missing Redirect URL");
-    //     //     throw new Error(`Approve API succeeded but no redirectUrl/paymentLink in response: ${JSON.stringify(body)}`);
-    //     // }
-
-    //     // this.log(`Approve API succeeded, redirecting to: ${redirectUrl}`);
-
-    //     await this.page.waitForURL(/iprulifeinsurance\.com/, {
-    //         timeout: 30000,
-    //         waitUntil: "domcontentloaded",
-    //     });
-    //     return true;
-    // }
-
     private async approveOnReview(reviewUrl: string): Promise<boolean> {
         if (!reviewUrl) throw new Error("Could not resolve life-insurance review URL (missing referenceId)");
 
@@ -224,13 +140,6 @@ export class CheckoutPage extends BasePage {
         await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
         await this.fullScreenScreenshot("Accept terms checkbox");
 
-        // await Promise.all([
-        //     this.page.waitForResponse(
-        //         (res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST"
-        //             && (this.log(`Approve API Request: ${res.request().postData()}`), true)
-        //     ),
-        //     this.click(this.approveBtn, "click on Approve button"),
-        // ]);
 
         const [approveResponse] = await Promise.all([
             this.page.waitForResponse(
@@ -250,44 +159,6 @@ export class CheckoutPage extends BasePage {
         });
         return true;
     }
-
-    // private async buildReviewUrl(): Promise<string | null> {
-    //     const current = new URL(this.page.url());
-    //     let referenceId = current.searchParams.get("referenceId");
-
-    //     if (!referenceId) {
-    //         const link = this.page.locator("a[href*='referenceId']").first();
-    //         const href = await link.getAttribute("href").catch(() => null);
-    //         if (href) referenceId = new URL(href, this.page.url()).searchParams.get("referenceId");
-    //     }
-
-    //     if (!referenceId) return null;
-    //     return `${current.origin}/life-insurance/review?referenceId=${referenceId}`;
-    // }
-
-    // private async validateInsurerRedirection() {
-    //     this.log("Validating insurer redirection page");
-
-    //     await this.page.waitForURL(/iprulifeinsurance\.com/, { timeout: 30000 });
-
-    //     const checks: { name: string; locator: Locator }[] = [
-    //         { name: "Application Number label", locator: this.applicationNumberLabel },
-    //         { name: "Identity Details heading", locator: this.identityDetailsHeading },
-    //         { name: "KYC & Quotation step", locator: this.kycQuotationStep },
-    //         { name: "Identity & Financial step", locator: this.identityFinancialStep },
-    //         { name: "Lifestyle & Health step", locator: this.lifestyleHealthStep },
-    //         { name: "Payout step", locator: this.payoutStep },
-    //         { name: "Review & Payment step", locator: this.reviewPaymentStep },
-    //     ];
-
-    //     for (const { name, locator } of checks) {
-    //         const isVisible = await locator.first().isVisible().catch(() => false);
-    //         this.log(`${name} visible: ${isVisible}`);
-    //     }
-
-    //     await this.fullScreenScreenshot("Insurer Redirection Page Screenshot");
-    //     this.log("Insurer redirection validated");
-    // }
 
     private async validateInsurerRedirection() {
         this.log("Validating insurer redirection page");
