@@ -118,7 +118,7 @@ export class CheckoutPage extends BasePage {
         const referenceId: string | undefined = body?.data?.referenceId;
 
         if (!referenceId) {
-            throw new Error(`Could not resolve referenceId from proposals response: ${JSON.stringify(body)}`);
+            throw new Error(`Could not get referenceId from proposals response: ${JSON.stringify(body)}`);
         }
 
         const origin = new URL(this.page.url()).origin;
@@ -126,7 +126,7 @@ export class CheckoutPage extends BasePage {
     }
 
     private async approveOnReview(reviewUrl: string): Promise<boolean> {
-        if (!reviewUrl) throw new Error("Could not resolve life-insurance review URL (missing referenceId)");
+        if (!reviewUrl) throw new Error("Could not get life-insurance review URL (missing referenceId)");
 
         await this.page.goto(reviewUrl);
 
