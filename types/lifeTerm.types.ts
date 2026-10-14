@@ -23,6 +23,8 @@ export interface LifeTermScenario {
     rider4: string;
     rider4SI: number | undefined;
     expected: string;
+    rider5: string;
+    rider5SI: number | undefined;
     whyNegative: string;
     planName: string;
 }

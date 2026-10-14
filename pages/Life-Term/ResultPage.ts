@@ -134,7 +134,7 @@ export class ResultPage extends BasePage {
     }
 
     private async openPlanDetailsAndDownloads(planName: string) {
-        await this.clickViewDetailsByPlanName(planName,);
+        await this.clickViewDetailsByPlanNameICICI(planName);
         await this.fullScreenScreenshot("Result Page: View Details Screenshot");
         if (await this.downloadsSection.isVisible().catch(() => false)) {
             await this.click(this.downloadsSection, "click on Downloads button");
@@ -221,7 +221,7 @@ export class ResultPage extends BasePage {
     }
 
 
-    async clickViewDetailsByPlanName(planName: string) {
+    async clickViewDetailsByPlanNameICICI(planName: string) {
         if (!planName) {
             throw new Error("planName is required to click View Details button");
         }
@@ -327,4 +327,112 @@ export class ResultPage extends BasePage {
         await this.click(this.getRiderCheckbox("Waiver of Premium"), "click on Waiver of Premium checkbox");
     }
 
+    async lifeTermResultJourneyHDFC(scenario: LifeTermScenario): Promise<boolean> {
+        this.log("Starting Result Journey");
+        await expect(this.page).toHaveURL(/\/results?/, { timeout: 60000 });
+
+        await this.selectSumAssured(scenario.sumAssured);
+        await this.selectCoverUptoAge(scenario.maturityAge);
+        await this.selectPaymentFrequency(scenario.paymentFrequency);
+        // await this.validatenegativeCasesScenarios(scenario.type, scenario.expected, scenario.planName);
+        // const shouldStop = await this.validateNegativeCasesScenarios(scenario.type, scenario.expected, scenario.planName, scenario.tcId);
+        // if (shouldStop) {
+        //     this.log("Stopping journey — negative case confirmed or plan not present as expected or plan is not visible due to insurer side issue.");
+        //     await this.fullScreenScreenshot("Result Page: Result page Screenshot id plan is not available");
+        //     return true;
+        // }
+        await this.sortByClaimSettlementRatio();
+        await this.applyRidersForHDFCPlan(scenario);
+        await this.openPlanDetailsAndDownloads(scenario.planName);
+        await this.click(this.buyNowBtn, "click on Buy Now button");
+        await this.page.waitForURL(/\/(kyc|checkout|proposal)/, { timeout: 30000 });
+        this.log("Completed Result Journey");
+        return false;
+    }
+
+    async clickViewDetailsByPlanNameHDFC(planName: string) {
+        if (!planName) {
+            throw new Error("planName is required to click View Details button");
+        }
+
+        const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: planName });
+        await planCard.waitFor({ state: "visible", timeout: 15000 });
+
+        const viewDetailsBtn = planCard.getByRole("button", { name: /view details/i });
+        await viewDetailsBtn.waitFor({ state: "visible", timeout: 15000 });
+
+        await this.click(viewDetailsBtn, `click on View Details button for plan: ${planName}`);
+    }
+
+    private async openPlanDetailsAndDownloadsHDFC(planName: string) {
+        await this.clickViewDetailsByPlanNameHDFC(planName);
+        await this.fullScreenScreenshot("Result Page: View Details Screenshot");
+        if (await this.downloadsSection.isVisible().catch(() => false)) {
+            await this.click(this.downloadsSection, "click on Downloads button");
+        }
+
+        if (await this.policyBrochure.isVisible().catch(() => false)) {
+            const popupPromise = this.page.waitForEvent("popup").catch(() => null);
+            await this.click(this.policyBrochure, "click on Policy Brochure button");
+            const popup = await popupPromise;
+            if (popup) await this.clickPdfViewerDownload(popup);
+        }
+
+        const [download] = await Promise.all([
+            this.page.waitForEvent("download"),
+            this.click(this.downloadBiBtn, "click on Download BI on PDP button"),
+        ]);
+        fs.mkdirSync("lifeBiCompare", { recursive: true });
+        await download.saveAs("lifeBiCompare/BiPDPPage.pdf");
+        this.log("Policy brochure is downloaded on PDP page");
+    }
+
+    private async applyRidersForHDFCPlan(scenario: LifeTermScenario) {
+        console.log("applyRidersForHDFCPlan", scenario);
+        if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4, scenario.rider5].some(Boolean)) return;
+
+        const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: scenario.planName });
+        const viewAddonsForPlan = planCard.getByText(/view \d+ available addons/i);
+        console.log("viewAddonsForPlan", viewAddonsForPlan);
+
+        await viewAddonsForPlan.waitFor({ state: "visible", timeout: 15000 });
+        await this.click(viewAddonsForPlan, "click on View addons button");
+
+        if (scenario.rider1) await this.IncomeBenefitonAccidentalDisability(scenario.rider1SI);
+        if (scenario.rider2) await this.LiveWellAccidentalDeathCover(scenario.rider2SI);
+        if (scenario.rider3) await this.LiveWellPersonalAccidentCover(scenario.rider3SI);
+        if (scenario.rider4) await this.HealthPlusCriticalIllnesses(scenario.rider4SI);
+        if (scenario.rider5) await this.HealthPlusCancerCover(scenario.rider5SI);
+
+        await this.page.waitForTimeout(2000);
+
+    }
+    private async IncomeBenefitonAccidentalDisability( coverAmount?: number) {
+        await this.click(this.getRiderCard("Income Benefit on Accidental Disability").locator(".Addons_name__31m6r"), "click on Income Benefit on Accidental Disability Cover button");
+        await this.click(this.getRiderCoverDropdown("Income Benefit on Accidental Disability"), "click on Income Benefit on Accidental Disability cover dropdown");
+        await this.submitAddonCover(coverAmount);
+    }
+
+    private async LiveWellAccidentalDeathCover( coverAmount?: number) {
+        await this.click(this.getRiderCard("LiveWell - Accidental Death Cover").locator(".Addons_name__31m6r"), "click on Live Well Accidental Death Cover button");
+        await this.click(this.getRiderCoverDropdown("LiveWell - Accidental Death Cover"), "click on Live Well Accidental Death Cover cover dropdown");
+        await this.submitAddonCover(coverAmount);
+    }
+
+    private async LiveWellPersonalAccidentCover( coverAmount?: number) {
+        await this.click(this.getRiderCard("LiveWell - Personal Accident Cover").locator(".Addons_name__31m6r"), "click on Live Well Personal Accident Cover button");
+        await this.click(this.getRiderCoverDropdown("LiveWell - Personal Accident Cover"), "click on Live Well Personal Accident Cover cover dropdown");
+        await this.submitAddonCover(coverAmount);
+    }
+
+    private async HealthPlusCriticalIllnesses( coverAmount?: number) {
+        await this.click(this.getRiderCard("Health Plus - Critical Illnesses").locator(".Addons_name__31m6r"), "click on Health Plus Critical Illnesses button");
+        await this.click(this.getRiderCoverDropdown("Health Plus - Critical Illnesses"), "click on Health Plus Critical Illnesses cover dropdown");
+        await this.submitAddonCover(coverAmount);
+    }
+    private async HealthPlusCancerCover( coverAmount?: number) {
+        await this.click(this.getRiderCard("Health Plus - Cancer Cover").locator(".Addons_name__31m6r"), "click on Health Plus Cancer Cover button");
+        await this.click(this.getRiderCoverDropdown("Health Plus - Cancer Cover"), "click on Health Plus Cancer Cover cover dropdown");
+        await this.submitAddonCover(coverAmount);
+    }
 }

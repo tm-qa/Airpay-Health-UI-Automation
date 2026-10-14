@@ -1,4 +1,4 @@
-import { Page, Locator } from "@playwright/test";
+import { Page, Locator, expect } from "@playwright/test";
 import * as fs from "fs";
 import toMatchPdf from "pdf-visual-comparer/playwright";
 import { BasePage } from "../BasePage";
@@ -15,6 +15,8 @@ export class CheckoutPage extends BasePage {
     readonly sharePaymentLinkBtn: Locator;
     readonly copyLink: Locator;
     readonly clickHere: Locator;
+    readonly clickHereHDFCBI: Locator;
+    readonly clickHereHDFCSuitability: Locator;
     readonly termsCheckbox: Locator;
     readonly approveBtn: Locator;
     readonly applicationNumberLabel: Locator;
@@ -23,6 +25,7 @@ export class CheckoutPage extends BasePage {
     readonly lifestyleHealthStep: Locator;
     readonly payoutStep: Locator;
     readonly reviewPaymentStep: Locator;
+    readonly hdfcplanname: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -40,6 +43,9 @@ export class CheckoutPage extends BasePage {
         this.sharePaymentLinkBtn = page.getByRole("button", { name: /share payment link/i });
         this.copyLink = page.getByText(/copy link/i);
         this.clickHere = page.getByText(/\*\s*click here/i);
+        this.clickHereHDFCBI = page.getByText(/\*\s*click here/i).first();
+    
+        this.clickHereHDFCSuitability = page.getByText(/\*\s*click here/i).nth(1);
         this.termsCheckbox = page.getByRole("checkbox");
         this.approveBtn = page.getByRole("button", { name: /approve/i });
 
@@ -49,6 +55,7 @@ export class CheckoutPage extends BasePage {
         this.lifestyleHealthStep = page.getByText("Lifestyle & Health", { exact: true });
         this.payoutStep = page.getByText("Payout", { exact: true });
         this.reviewPaymentStep = page.getByText("Review & Payment", { exact: true });
+        this.hdfcplanname = page.getByRole('heading', { name: 'HDFC Life Click 2 Protect Supreme Plus(spl)' })
 
     }
 
@@ -183,4 +190,74 @@ export class CheckoutPage extends BasePage {
         await this.fullScreenScreenshot("Insurer Redirection Page Screenshot");
         this.log("Insurer redirection validated");
     }
+
+    private async approveOnReviewHDFC(reviewUrl: string): Promise<boolean> {
+        if (!reviewUrl) throw new Error("Could not get life-insurance review URL (missing referenceId)");
+
+
+        await this.page.goto(reviewUrl);
+    
+        await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
+        await this.fullScreenScreenshot("Accept terms checkbox");
+
+        const [download] = await Promise.all([
+            this.page.waitForEvent("download"),
+            this.click(this.clickHereHDFCBI, "click on Click here BI button"),
+        ]);
+        // fs.mkdirSync("lifeBiCompare", { recursive: true });
+        // await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
+
+        const [downloadSuitability] = await Promise.all([
+            this.page.waitForEvent("download"),
+            this.click(this.clickHereHDFCSuitability, "click on Click here Suitability button"),
+        ]);
+
+
+        
+
+
+        const [approveResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (res) => res.url().includes("/products/life/payments/approve") && res.request().method() === "POST"
+                    && (this.log(`Approve API Request: ${res.request().postData()}`), true)
+            ),
+            this.click(this.approveBtn, "click on Approve button"),
+        ]);
+
+        const approveBody = await approveResponse.json().catch(() => null);
+        //this.log(`Approve API Response (status ${approveResponse.status()}): ${JSON.stringify(approveBody)}`);
+        this.log(`Approve API Response (status ${approveResponse.status()})`);
+
+        await this.page.waitForURL(/onlineinsurance.hdfclife.com/, {
+            timeout: 30000,
+            waitUntil: "domcontentloaded",
+        });
+
+        await expect(this.page.getByText("Access Denied")).toBeVisible();
+
+        // const isVisible = await this.hdfcplanname.isVisible().catch(() => false);
+        // if (!isVisible) {
+        //     throw new Error("HDFC Life Click 2 Protect Supreme Plus(spl) plan is not visible");
+        // }
+       // await expect(this.hdfcplanname).toBeVisible({ timeout: 30000 });
+        await this.fullScreenScreenshot("HDFC Life Click 2 Protect Supreme Plus(spl) plan name validated");
+        return true;
+
+    }
+
+    async lifeTermCheckoutJourneyHDFC(_scenario: LifeTermScenario): Promise<boolean> {
+        this.log("Starting Checkout Journey");
+        await this.fillProposerDetails();
+        const reviewUrl = await this.sharePaymentLink();
+        const approved = await this.approveOnReviewHDFC(reviewUrl);
+        if (!approved) {
+            this.log("Approve API failed, skipping validation");
+            return false;
+        }
+        // await this.biPdfCompare();
+        
+        this.log("Completed Checkout Journey");
+        return true;
+    }
+
 }

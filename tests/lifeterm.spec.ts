@@ -3,11 +3,12 @@ import { Dashboardpage } from "../pages/Dashboard/Dashboardpage";
 import { ProfilePage } from "../pages/Life-Term/ProfilePage";
 import { ResultPage } from "../pages/Life-Term/ResultPage";
 import { CheckoutPage } from "../pages/Life-Term/CheckoutPage";
-import { getLifeTermScenarios } from "../utils/lifeTermScenarioBuilder";
+import { getLifeTermScenarios,getLifeTermScenariosForHDFC } from "../utils/lifeTermScenarioBuilder";
 
 const LIFE_TERM_SCENARIOS = getLifeTermScenarios();
+const LIFE_TERM_SCENARIOS_HDFC = getLifeTermScenariosForHDFC();
 
-test.describe("@LifeTerm Life Term Tests", () => {
+test.describe("@LifeTerm Life Term ICICI Tests", () => {
     //test.describe.configure({ mode: "serial" });
 
     let dashboardPage: Dashboardpage;
@@ -32,6 +33,36 @@ test.describe("@LifeTerm Life Term Tests", () => {
             await profilePage.lifeTermProfileJourney(scenario);
             const shouldStop = await resultPage.lifeTermResultJourney(scenario); if (shouldStop) return;
             const approved = await checkoutPage.lifeTermCheckoutJourney(scenario); if (!approved) return;
+            console.log(`AUTOMATION_LOG: ==========> ${scenario.tcId} | ${scenario.expected} | ${scenario.sumAssured} | ========== Passed`);
+        });
+    }
+});
+
+test.describe("@LifeTerm Life Term HDFC Tests", () => {
+    //test.describe.configure({ mode: "serial" });
+
+    let dashboardPage: Dashboardpage;
+    let profilePage: ProfilePage;
+    let resultPage: ResultPage;
+    let checkoutPage: CheckoutPage;
+
+    test.beforeEach(async ({ page }) => {
+        dashboardPage = new Dashboardpage(page);
+        profilePage = new ProfilePage(page);
+        resultPage = new ResultPage(page);
+        checkoutPage = new CheckoutPage(page);
+        await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
+        await page.waitForURL(/dashboard/, { timeout: 30000 });
+    });
+
+    for (const scenario of LIFE_TERM_SCENARIOS_HDFC) {
+        test(`${scenario.tcId} | ${scenario.type} | ${scenario.expected} | ${scenario.sumAssured}`, async () => {
+            test.setTimeout(180000);
+            console.log(`========== ${scenario.tcId} | ${scenario.expected} | ${scenario.sumAssured} ==========`);
+            await dashboardPage.navigateToLifeTermInsurance(scenario.cifNumber);
+            await profilePage.lifeTermProfileJourney(scenario);
+            const shouldStop = await resultPage.lifeTermResultJourneyHDFC(scenario); if (shouldStop) return;
+            const approved = await checkoutPage.lifeTermCheckoutJourneyHDFC(scenario); if (!approved) return;
             console.log(`AUTOMATION_LOG: ==========> ${scenario.tcId} | ${scenario.expected} | ${scenario.sumAssured} | ========== Passed`);
         });
     }
