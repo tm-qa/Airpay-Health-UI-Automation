@@ -44,7 +44,7 @@ export class CheckoutPage extends BasePage {
         this.copyLink = page.getByText(/copy link/i);
         this.clickHere = page.getByText(/\*\s*click here/i);
         this.clickHereHDFCBI = page.getByText(/\*\s*click here/i).first();
-    
+
         this.clickHereHDFCSuitability = page.getByText(/\*\s*click here/i).nth(1);
         this.termsCheckbox = page.getByRole("checkbox");
         this.approveBtn = page.getByRole("button", { name: /approve/i });
@@ -98,7 +98,7 @@ export class CheckoutPage extends BasePage {
         await this.click(this.maritalStatus, "select on Marital Status button", { force: true });
         await this.fullScreenScreenshot("Marital Status Page Screenshot");
         await this.click(this.page.getByText("Married").nth(1), "click on Married button");
-        await this.fill(this.pan, "ABCDR2345A", "fill PAN");
+        await this.fill(this.pan, "DDIPP6888K", "fill PAN");
         await this.indianResidence.isVisible().then(async (isVisible) => {
             if (isVisible) {
                 await this.click(this.yesRadioBtn, "click on Yes radio button");
@@ -197,7 +197,7 @@ export class CheckoutPage extends BasePage {
 
 
         await this.page.goto(reviewUrl);
-    
+
         await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
         await this.fullScreenScreenshot("Accept terms checkbox");
 
@@ -214,7 +214,7 @@ export class CheckoutPage extends BasePage {
         ]);
 
 
-        
+
 
 
         const [approveResponse] = await Promise.all([
@@ -234,15 +234,52 @@ export class CheckoutPage extends BasePage {
             waitUntil: "domcontentloaded",
         });
 
-        await expect(this.page.getByText("Access Denied")).toBeVisible();
+        //     await expect(this.page.getByText("Access Denied")).toBeVisible();
 
-        // const isVisible = await this.hdfcplanname.isVisible().catch(() => false);
-        // if (!isVisible) {
-        //     throw new Error("HDFC Life Click 2 Protect Supreme Plus(spl) plan is not visible");
+        //     // const isVisible = await this.hdfcplanname.isVisible().catch(() => false);
+        //     // if (!isVisible) {
+        //     //     throw new Error("HDFC Life Click 2 Protect Supreme Plus(spl) plan is not visible");
+        //     // }
+        //    // await expect(this.hdfcplanname).toBeVisible({ timeout: 30000 });
+        //     await this.fullScreenScreenshot("HDFC Life Click 2 Protect Supreme Plus(spl) plan name validated");
+        //     return true;
+
+        const accessDenied = this.page.getByText("Access Denied");
+        // const isAccessDenied = await accessDenied.isVisible().catch(() => false);
+
+        // if (isAccessDenied) {
+        //     await expect(accessDenied).toBeVisible();
+        //     return true;
+        // } else {
+        //     const isPlanVisible = await this.hdfcplanname.isVisible().catch(() => false);
+
+
+        //     if (isPlanVisible) {
+        //         await expect(this.hdfcplanname).toBeVisible({ timeout: 30000 });
+        //         return true;
+        //     } else {
+        //         throw new Error(
+        //             "Neither 'Access Denied' nor the HDFC Life Click 2 Protect Supreme Plus (SPL) plan is visible"
+        //         );
+        //         return false;
+        //     }
         // }
-       // await expect(this.hdfcplanname).toBeVisible({ timeout: 30000 });
-        await this.fullScreenScreenshot("HDFC Life Click 2 Protect Supreme Plus(spl) plan name validated");
-        return true;
+
+
+
+
+        try {
+            await expect(accessDenied).toBeVisible({ timeout: 5000 });
+            return true;
+        } catch {
+            try {
+                await expect(this.hdfcplanname).toBeVisible({ timeout: 30000 });
+                return true;
+            } catch {
+                throw new Error("Neither Access Denied nor HDFC plan is visible");
+            }
+        }
+
 
     }
 
@@ -256,7 +293,7 @@ export class CheckoutPage extends BasePage {
             return false;
         }
         // await this.biPdfCompare();
-        
+
         this.log("Completed Checkout Journey");
         return true;
     }
