@@ -5,7 +5,7 @@ export const ICICI_CONFIG: InsurerConfig = {
     name: "ICICI Elevate",
     excelPath: path.resolve("data/ICICI _ELEVATE _PLAN.xlsx"),
     sheetName: "Sheet1",
-    cifNumber: "001812758",
+    cifNumber: "12345",
     kyc: {
         pan: "BKGPC8713D",
         dob: "24/12/1997",
