@@ -49,7 +49,7 @@ export class CheckoutPage extends BasePage {
         this.correspondenceCheckbox = page.getByRole("checkbox", {
             name: "Correspondence address same as permanent address",
         });
-        this.insuredDetailsHeading = page.getByRole("heading", { name: "2. Insured Details" });
+        this.insuredDetailsHeading = page.getByRole("heading", { name: /Insured Details/i });
         this.proposerMaritalStatus = page.getByRole("combobox", { name: "Marital Status *" }).first();
         this.heightFeet = page.getByRole("textbox", { name: "Height Feet *" });
         this.heightInches = page.getByRole("textbox", { name: "Height Inches *" });
@@ -139,6 +139,7 @@ export class CheckoutPage extends BasePage {
 
     private async fillInsuredDetails(scenario: HealthScenario) {
         await this.click(this.insuredDetailsHeading, "click on Insured Details heading");
+        await this.pickFirstAntOption(this.page.getByRole("combobox", { name: "Income *" }), "Income");
         await selectAntOption(this.page, this.proposerMaritalStatus, scenario.maritalStatus);
         await this.log(`select Marital Status: ${scenario.maritalStatus}`);
         await this.fullScreenScreenshot("Marital Status");
@@ -175,14 +176,18 @@ export class CheckoutPage extends BasePage {
             }
         }
         await this.page.keyboard.press("Escape");
-        const occupation = this.page.getByRole("combobox", { name: /occupation/i });
-        if (await occupation.isVisible()) {
-            await occupation.scrollIntoViewIfNeeded();
-            await occupation.click();
-            const occOpt = this.page.getByRole("option").first();
-            if (await occOpt.isVisible({ timeout: 5000 }).catch(() => false)) await occOpt.click();
-            await this.log("select Occupation");
-        }
+        await this.pickFirstAntOption(
+            this.page.locator(".ant-select").filter({ hasText: "Select Occupation" }),
+            "Occupation"
+        );
+        // const occupation = this.page.getByRole("combobox", { name: /occupation/i });
+        // if (await occupation.isVisible()) {
+        //     await occupation.scrollIntoViewIfNeeded();
+        //     await occupation.click();
+        //     const occOpt = this.page.getByRole("option").first();
+        //     if (await occOpt.isVisible({ timeout: 5000 }).catch(() => false)) await occOpt.click();
+        //     await this.log("select Occupation");
+        // }
         const education = this.page.getByRole("combobox", { name: /education/i });
         if (await education.isVisible()) {
             await education.click();
@@ -271,12 +276,12 @@ export class CheckoutPage extends BasePage {
             await this.click(this.paymentGatewayRadio, "click on Payment Gateway radio button");
         }
 
-        const href = await this.seeMoreQuotesLink.getAttribute("href");
-        if (href?.includes("referenceId")) {
-            await this.fullScreenScreenshot("Payment");
-            const referenceId = new URL(href, this.page.url()).searchParams.get("referenceId");
-            return `https://pro.airpay.saas-sanity.turtle-feature.com/health-insurance/review?referenceId=${referenceId}`;
-        }
+        // const href = await this.seeMoreQuotesLink.getAttribute("href");
+        // if (href?.includes("referenceId")) {
+        //     await this.fullScreenScreenshot("Payment");
+        //     const referenceId = new URL(href, this.page.url()).searchParams.get("referenceId");
+        //     return `https://pro.airpay.saas-sanity.turtle-feature.com/health-insurance/review?referenceId=${referenceId}`;
+        // }
 
         await this.click(this.sharePaymentLink, "click on Share Payment Link button");
         await expect(this.shareDialog).toBeVisible({ timeout: 20000 });
@@ -287,4 +292,18 @@ export class CheckoutPage extends BasePage {
         const referenceId = new URL(reviewHref!, this.page.url()).searchParams.get("referenceId");
         return `https://pro.airpay.saas-sanity.turtle-feature.com/health-insurance/review?referenceId=${referenceId}`;
     }
+
+    private async pickFirstAntOption(trigger: Locator, label: string) {
+        await trigger.scrollIntoViewIfNeeded();
+        await trigger.click();
+        await this.click(
+            this.page
+                .locator(".ant-select-dropdown:not(.ant-select-dropdown-hidden)")
+                .last()
+                .locator(".ant-select-item-option")
+                .first(),
+            `select ${label}`
+        );
+    }
+
 }

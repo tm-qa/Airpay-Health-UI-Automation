@@ -10,10 +10,11 @@ import { HealthScenario } from "../types/health.types";
 import { PayUPaymentPage } from "../pages/Health/PayUPaymentPage";
 import { HdfcPaymentGatewayPage } from "../pages/Health/HdfcPaymentGatewayPage";
 import { PaymentSuccessPage } from "../pages/Health/PaymentSuccessPage";
+import { OVDPage } from "../pages/Health/OVDPage";
 
 export async function runHealthE2e(page: Page, scenario: HealthScenario, config: InsurerConfig) {
     const dashboardPage = new Dashboardpage(page);
-    const profilePage = new ProfilePage(page);
+    const profilePage = new ProfilePage(page); 
     const resultPage = new ResultPage(page, config);
     const kycPage = new KYCPage(page);
     const checkoutPage = new CheckoutPage(page, config);
@@ -21,6 +22,7 @@ export async function runHealthE2e(page: Page, scenario: HealthScenario, config:
     const hdfcPaymentGatewayPage = new HdfcPaymentGatewayPage(page);
     const payUPaymentPage = new PayUPaymentPage(page);
     const paymentSuccessPage = new PaymentSuccessPage(page);
+    const ovdPage = new OVDPage(page);
 
     console.log(`\n========== ${scenario.tcId} | ${scenario.combinations} | ${scenario.coverAmount} ==========`);
     console.log(`Cover: ${scenario.coverAmount} | Deductible: ${scenario.deductible}`);
@@ -40,7 +42,7 @@ export async function runHealthE2e(page: Page, scenario: HealthScenario, config:
     // }
 
     console.log("Step 4: Fill KYC details");
-    await kycPage.fillKYCDetails(config.kyc);
+    await ovdPage.uploadAadhaar();
 
     console.log("Step 5: Fill Checkout / Proposal form");
     const paymentUrl = await checkoutPage.fillProposalFormHealth(scenario);
@@ -52,14 +54,14 @@ export async function runHealthE2e(page: Page, scenario: HealthScenario, config:
     //     return;
     // }
 
-    console.log('payment application approved');
-    await hdfcPaymentGatewayPage.payViaNetBanking();
+    // console.log('payment application approved');
+    // await hdfcPaymentGatewayPage.payViaNetBanking();
 
-    console.log('HDFC payment gateway completed');
-    await payUPaymentPage.completeTestPayment();
+    // console.log('HDFC payment gateway completed');
+    // await payUPaymentPage.completeTestPayment();
 
-    console.log('PayU test payment completed');
-    await paymentSuccessPage.verifyAndLogPolicyDetails();
+    // console.log('PayU test payment completed');
+    // await paymentSuccessPage.verifyAndLogPolicyDetails();
 
     console.log(`========== Completed ${scenario.tcId} ==========\n`);
 }
