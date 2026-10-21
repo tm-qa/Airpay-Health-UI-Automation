@@ -104,8 +104,26 @@ export class CheckoutPage extends BasePage {
         return this.proceedForPayment();
     }
 
+    // private async fillContactDetails() {
+    //     await this.check(this.correspondenceCheckbox, "click on Correspondence address same checkbox");
+    //     await this.fullScreenScreenshot("Correspondence address same");
+    //     await this.click(this.continueButton, "click on Continue button", { force: true });
+    // }
+
     private async fillContactDetails() {
-        await this.check(this.correspondenceCheckbox, "click on Correspondence address same checkbox");
+        const hasSameAsCheckbox = await this.correspondenceCheckbox
+            .waitFor({ state: "visible", timeout: 5000 })
+            .then(() => true)
+            .catch(() => false);
+
+        if (hasSameAsCheckbox) {
+            await this.check(this.correspondenceCheckbox, "click on Correspondence address same checkbox");
+        } else {
+            const line1 = this.page.getByRole("textbox", { name: "Address Line 1 *" });
+            const line2 = this.page.getByRole("textbox", { name: "Address Line 2" });
+            await this.fill(line1.last(), await line1.first().inputValue(), "fill Correspondence Address Line 1");
+            await this.fill(line2.last(), await line2.first().inputValue(), "fill Correspondence Address Line 2");
+        }
         await this.fullScreenScreenshot("Correspondence address same");
         await this.click(this.continueButton, "click on Continue button", { force: true });
     }
@@ -176,10 +194,10 @@ export class CheckoutPage extends BasePage {
             }
         }
         await this.page.keyboard.press("Escape");
-        await this.pickFirstAntOption(
-            this.page.locator(".ant-select").filter({ hasText: "Select Occupation" }),
-            "Occupation"
-        );
+        const occupation = this.page.locator(".ant-select").filter({ hasText: "Select Occupation" }).first();
+        if (await occupation.isVisible()) {
+            await this.pickFirstAntOption(occupation, "Occupation");
+        }
         // const occupation = this.page.getByRole("combobox", { name: /occupation/i });
         // if (await occupation.isVisible()) {
         //     await occupation.scrollIntoViewIfNeeded();
