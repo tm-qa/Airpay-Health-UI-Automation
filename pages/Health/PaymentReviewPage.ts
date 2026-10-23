@@ -17,7 +17,8 @@ export class PaymentReviewPage extends BasePage {
             .filter({ hasText: /I hereby confirm that all the details mentioned here are correct/i })
             .getByRole("checkbox");
         this.customerInfoSheetLink = page.locator("a.ant-typography").filter({ hasText: /customer information sheet/i });
-        this.termsAndConditionsLink = page.getByText("* Click here", { exact: true });
+        // this.termsAndConditionsLink = page.getByText("* Click here", { exact: true });
+        this.termsAndConditionsLink = page.getByText(/^\* (Click here|Terms & Conditions)$/);
         this.termsCloseButton = page.getByRole("button", { name: "Close" });
         this.approveButton = page.getByRole("button", { name: "Approve" });
     }
