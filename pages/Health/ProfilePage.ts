@@ -74,7 +74,7 @@ export class ProfilePage extends BasePage {
 
     private async goNext(scenario: HealthScenario) {
         await this.fillVisiblePincode(scenario.members[0]?.pincode);
-        await this.page.locator(".loader_loaderContainer__rDdBU").waitFor({ state: "hidden", timeout: 15000 }).catch(() => {});
+        await this.page.locator(".loader_loaderContainer__rDdBU").waitFor({ state: "hidden", timeout: 15000 }).catch(() => { });
         await this.click(this.nextBtn, "click on Next button");
     }
 
@@ -106,26 +106,60 @@ export class ProfilePage extends BasePage {
         }
     }
 
+    // private async pickDropdownOption(labels: string[]) {
+    //     for (const label of labels) {
+    //         for (let attempt = 0; attempt < 3; attempt++) {
+    //             await this.page.keyboard.press("Escape");
+    //             await this.click(this.insuredCombo, "click on Who would you like to get insured dropdown");
+
+    //             const option = this.page
+    //                 .locator(".ant-select-dropdown:visible")
+    //                 .getByText(label, { exact: true })
+    //                 .first();
+
+    //             if (await option.isVisible({ timeout: 3000 }).catch(() => false)) {
+    //                 await option.evaluate((el) => (el as HTMLElement).click());
+    //                 await this.log(`click on ${label} option`);
+    //                 return label;
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
+
+
     private async pickDropdownOption(labels: string[]) {
         for (const label of labels) {
             for (let attempt = 0; attempt < 3; attempt++) {
                 await this.page.keyboard.press("Escape");
-                await this.click(this.insuredCombo, "click on Who would you like to get insured dropdown");
+                await this.click(
+                    this.insuredCombo,
+                    "click on Who would you like to get insured dropdown"
+                );
 
                 const option = this.page
                     .locator(".ant-select-dropdown:visible")
                     .getByText(label, { exact: true })
                     .first();
 
-                if (await option.isVisible({ timeout: 3000 }).catch(() => false)) {
-                    await option.evaluate((el) => (el as HTMLElement).click());
+                try {
+                    await option.waitFor({
+                        state: "visible",
+                        timeout: 5000
+                    });
+
+                    await option.click({ timeout: 5000 });
                     await this.log(`click on ${label} option`);
                     return label;
+                } catch {
+
                 }
             }
         }
+
         return null;
     }
+
 
     private async selectMembers(scenario: HealthScenario) {
         await this.clearSelectedMembers();
