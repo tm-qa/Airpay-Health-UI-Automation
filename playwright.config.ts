@@ -36,8 +36,8 @@ export default defineConfig({
     // baseURL: 'http://localhost:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-   baseURL: 'https://airpay.saas-sanity.turtle-feature.com',
-    // baseURL: 'https://insurance.airpay.money/signup',
+  //  baseURL: 'https://airpay.saas-sanity.turtle-feature.com',
+    baseURL: 'https://insurance.airpay.money/signup',
     //baseURL: 'https://piramal.saas-sanity.turtle-feature.com',
     storageState: 'storageState.json',
     trace: 'on-first-retry',
