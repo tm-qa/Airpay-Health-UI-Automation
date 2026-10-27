@@ -162,7 +162,7 @@ export class CheckoutPage extends BasePage {
         //this.log(`Approve API Response (status ${approveResponse.status()}): ${JSON.stringify(approveBody)}`);
         this.log(`Approve API Response (status ${approveResponse.status()})`);
 
-        await this.page.waitForURL(/iprulifeinsurance\.com/, {
+        await this.page.waitForURL(/iprulifeinsurance\.com|icicilife\.com/, {
             timeout: 30000,
             waitUntil: "domcontentloaded",
         });
