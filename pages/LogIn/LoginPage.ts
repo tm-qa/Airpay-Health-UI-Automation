@@ -21,8 +21,8 @@ export class LoginPage extends BasePage {
   }
 
   async navigateToLogin() {
-    await this.page.goto('https://airpay.saas-sanity.turtle-feature.com/signup');
-    // await this.page.goto('https://insurance.airpay.money/signup');
+    // await this.page.goto('https://airpay.saas-sanity.turtle-feature.com/signup');
+    await this.page.goto('https://insurance.airpay.money/signup');
   }
 
 
