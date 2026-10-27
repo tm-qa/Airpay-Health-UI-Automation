@@ -148,13 +148,13 @@ export class ResultPage extends BasePage {
             if (popup) await this.clickPdfViewerDownload(popup);
         }
 
-        const [download] = await Promise.all([
-            this.page.waitForEvent("download"),
-            this.click(this.downloadBiBtn, "click on Download BI on PDP button"),
-        ]);
-        fs.mkdirSync("lifeBiCompare", { recursive: true });
-        await download.saveAs("lifeBiCompare/BiPDPPage.pdf");
-        this.log("Policy brochure is downloaded on PDP page");
+        // const [download] = await Promise.all([
+        //     this.page.waitForEvent("download"),
+        //     this.click(this.downloadBiBtn, "click on Download BI on PDP button"),
+        // ]);
+        // fs.mkdirSync("lifeBiCompare", { recursive: true });
+        // await download.saveAs("lifeBiCompare/BiPDPPage.pdf");
+        // this.log("Policy brochure is downloaded on PDP page");
     }
 
     private async clickPdfViewerDownload(target: Page = this.page) {

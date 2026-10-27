@@ -139,12 +139,12 @@ export class CheckoutPage extends BasePage {
 
         await this.page.goto(reviewUrl);
 
-        const [download] = await Promise.all([
-            this.page.waitForEvent("download"),
-            this.click(this.clickHere, "click on Click here BI button"),
-        ]);
-        fs.mkdirSync("lifeBiCompare", { recursive: true });
-        await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
+        // const [download] = await Promise.all([
+        //     this.page.waitForEvent("download"),
+        //     this.click(this.clickHere, "click on Click here BI button"),
+        // ]);
+        // fs.mkdirSync("lifeBiCompare", { recursive: true });
+        // await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
 
         await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
         await this.fullScreenScreenshot("Accept terms checkbox");
@@ -202,17 +202,17 @@ export class CheckoutPage extends BasePage {
         await this.check(this.termsCheckbox.first(), "click on Accept terms checkbox");
         await this.fullScreenScreenshot("Accept terms checkbox");
 
-        const [download] = await Promise.all([
-            this.page.waitForEvent("download"),
-            this.click(this.clickHereHDFCBI, "click on Click here BI button"),
-        ]);
+        // const [download] = await Promise.all([
+        //     this.page.waitForEvent("download"),
+        //     this.click(this.clickHereHDFCBI, "click on Click here BI button"),
+        // ]);
         // fs.mkdirSync("lifeBiCompare", { recursive: true });
         // await download.saveAs("lifeBiCompare/BiReviewpage.pdf");
 
-        const [downloadSuitability] = await Promise.all([
-            this.page.waitForEvent("download"),
-            this.click(this.clickHereHDFCSuitability, "click on Click here Suitability button"),
-        ]);
+        // const [downloadSuitability] = await Promise.all([
+        //     this.page.waitForEvent("download"),
+        //     this.click(this.clickHereHDFCSuitability, "click on Click here Suitability button"),
+        // ]);
 
 
 
