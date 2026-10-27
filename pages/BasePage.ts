@@ -58,6 +58,10 @@ export class BasePage {
         await this.report(action, false);
     }
 
+    async logUrl(label = "Current URL") {
+        await this.report(`${label}: ${this.page.url()}`, false);
+    }
+
     async fullScreenScreenshot(name = "Full Page Screenshot") {
         await this.report(name, true, true);
     }

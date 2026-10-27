@@ -106,6 +106,7 @@ export class CheckoutPage extends BasePage {
     }
 
     async fillProposalFormHealth(scenario: HealthScenario): Promise<string> {
+        await this.logUrl('Current Checkout Page URL');
         await this.fillContactDetails();
         await this.fillInsuredDetails(scenario);
         const bankVisible = await this.isShown(this.accountHolderName, 8000);
@@ -121,7 +122,7 @@ export class CheckoutPage extends BasePage {
         return locator.waitFor({ state: "visible", timeout }).then(() => true).catch(() => false);
     }
 
-    /** Prefer the stable codegen id (#selfHeightFeet, #wifeTitle...), else fall back to positional locator. */
+
     private async byIdOr(id: string, fallback: Locator): Promise<Locator> {
         const byId = this.page.locator(`#${id}`);
         return (await byId.count()) > 0 ? byId.first() : fallback;

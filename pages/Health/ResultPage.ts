@@ -33,7 +33,7 @@ export class ResultPage extends BasePage {
     async verifyResultPageForHealth(scenario: HealthScenario): Promise<boolean> {
         await expect(this.page).toHaveURL(/\/results?/, { timeout: 60000 });
         await this.waitForQuotes();
-
+        await this.logUrl('Current Result Page URL');
         await this.log(`select Cover amount: ${scenario.coverAmount}`);
         await selectCoverFromDropdown(this.page, scenario.coverAmount);
         await this.waitForQuotes();

@@ -62,7 +62,7 @@ export class PaymentReviewPage extends BasePage {
                 await route.fulfill({ response });
             }
         );
-
+        await this.logUrl('Current PaymentReview Page URL')
         await this.click(this.approveButton, "click on Approve button");
 
         await expect.poll(() => paymentLink, { message: "approve API paymentLink", timeout: 20000 }).toBeTruthy();

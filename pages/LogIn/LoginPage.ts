@@ -1,6 +1,7 @@
 import { Page, Locator, expect } from "@playwright/test";
+import { BasePage } from "../BasePage";
 
-export class LoginPage {
+export class LoginPage extends BasePage {
   readonly page: Page;
   readonly userMobileInput: Locator;
   readonly continueButton: Locator;
@@ -10,6 +11,7 @@ export class LoginPage {
 
 
   constructor(page: Page) {
+    super(page);
     this.page = page;
     this.userMobileInput = page.getByRole('textbox', { name: 'Enter Your Mobile Number' });
     this.continueButton = page.getByRole('button', { name: 'Continue' });
@@ -19,8 +21,8 @@ export class LoginPage {
   }
 
   async navigateToLogin() {
-    // await this.page.goto('https://airpay.saas-sanity.turtle-feature.com/signup');
-    await this.page.goto('https://insurance.airpay.money/signup');
+    await this.page.goto('https://airpay.saas-sanity.turtle-feature.com/signup');
+    // await this.page.goto('https://insurance.airpay.money/signup');
   }
 
 
@@ -30,5 +32,6 @@ export class LoginPage {
     await expect(this.verifyOtpButton).toBeEnabled();
     await this.otpInput.fill('1234');
     await this.verifyOtpButton.click();
+    await this.logUrl('Current Login URL');
   }
 }
