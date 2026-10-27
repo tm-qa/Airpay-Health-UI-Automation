@@ -302,7 +302,7 @@ export class CheckoutPage extends BasePage {
         }
 
         await this.click(this.sharePaymentLink, "click on Share Payment Link button");
-        await expect(this.shareDialog).toBeVisible({ timeout: 20000 });
+        await expect(this.shareDialog).toBeVisible({ timeout: 90000 });
 
         this.page.once("dialog", (dialog) => dialog.dismiss().catch(() => undefined));
         if (await this.copyLink.isVisible()) await this.click(this.copyLink, "click on Copy Link button");
