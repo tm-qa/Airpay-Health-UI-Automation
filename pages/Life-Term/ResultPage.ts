@@ -72,6 +72,7 @@ export class ResultPage extends BasePage {
         await this.openPlanDetailsAndDownloads(scenario.planName);
         await this.click(this.buyNowBtn, "click on Buy Now button");
         await this.page.waitForURL(/\/(kyc|checkout|proposal)/, { timeout: 30000 });
+        this.logUrl("Current Result page URL");
         this.log("Completed Result Journey");
         return false;
     }
@@ -346,6 +347,7 @@ export class ResultPage extends BasePage {
         await this.openPlanDetailsAndDownloads(scenario.planName);
         await this.click(this.buyNowBtn, "click on Buy Now button");
         await this.page.waitForURL(/\/(kyc|checkout|proposal)/, { timeout: 30000 });
+        this.logUrl("Current Result page URL");
         this.log("Completed Result Journey");
         return false;
     }

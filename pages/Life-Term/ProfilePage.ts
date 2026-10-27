@@ -54,6 +54,7 @@ export class ProfilePage extends BasePage {
         await this.click(this.nextBtn, "click on Next button");
         await this.fullScreenScreenshot("Income Page Screenshot");
         await this.click(this.nextBtn, "click on Next - Save quote button");
+        this.logUrl("Current profile page URL");
         this.log("Completed Profile Journey");
     }
 

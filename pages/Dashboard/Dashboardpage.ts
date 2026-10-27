@@ -76,8 +76,8 @@ export class Dashboardpage extends BasePage {
         await this.click(this.verifyContinueBtn, "click on VERIFY CONTINUE button");
         await expect(this.healthInsurance).toBeVisible();
         await this.click(this.healthInsurance, "click on Health button");
+        this.logUrl("Current Dashboard page URL");
         this.log("Navigated to Life Term Insurance");
-        this.logUrl();
     }
 
     async navigateToLifeTermInsurance(cif = "12345") {
@@ -89,10 +89,11 @@ export class Dashboardpage extends BasePage {
         await this.click(this.verifyContinueBtn, "click on VERIFY CONTINUE button");
         await expect(this.lifeTermInsurance).toBeVisible();
         await this.click(this.lifeTermInsurance, "click on Term button");
+        this.logUrl("Current Dashboard page URL");
         this.log("Navigated to Life Term Insurance");
     }
 
-    async verifyLeadsearchInShowall(){
+    async verifyLeadsearchInShowall() {
         await this.click(this.searchBox, "Click into the lead searchbox");
         await this.fill(this.searchBox, "pranali", "Enter the lead name");
         this.page.screenshot();
@@ -100,7 +101,7 @@ export class Dashboardpage extends BasePage {
 
     }
 
-    async verifyViewQuoteBtnRedirection(){
+    async verifyViewQuoteBtnRedirection() {
         await this.click(this.viewQuotes, "click the lead having status view quotes");
         await this.click(this.viewQuotesBtn, "click on view quotes button on lead");
         await expect(this.page).toHaveURL(/.*\/result/);
@@ -110,7 +111,7 @@ export class Dashboardpage extends BasePage {
 
     }
 
-    async verifyCheckoutInProgressBtnRedirection(){
+    async verifyCheckoutInProgressBtnRedirection() {
         await this.click(this.checkoutInProgress, "click the lead having status checkout in progress");
         await this.click(this.checkoutInProgressBtn, "click on checkout in progress button on lead");
         await expect(this.page).toHaveURL(/.*\/checkout/);
@@ -120,7 +121,7 @@ export class Dashboardpage extends BasePage {
 
     }
 
-    async verifyPaymentInProgressBtnRedirection(){
+    async verifyPaymentInProgressBtnRedirection() {
         await this.click(this.paymentPending, "click the lead having status payment pending");
         await this.click(this.paymentInprogress, "click on payment in progress button on lead");
         await expect(this.page).toHaveURL(/.*\/payment-tracking/);
@@ -130,9 +131,9 @@ export class Dashboardpage extends BasePage {
 
     }
 
-    async verifyBusinessInsuranceSales(){
+    async verifyBusinessInsuranceSales() {
         await this.hover(this.businessTab, "Hover on business tab");
-       // await this.click(this.businessTab, "Click business tab");
+        // await this.click(this.businessTab, "Click business tab");
         await this.click(this.insuranceSales, "Click on insurance sales")
         this.page.screenshot();
         await this.click(this.leads, "click on leads tab");
@@ -141,7 +142,7 @@ export class Dashboardpage extends BasePage {
 
     }
 
-    async verifyProfileTab(){
+    async verifyProfileTab() {
         await this.click(this.profile, "Click on profile tab");
         await expect(this.page).toHaveURL(/.*\/account/);
         await this.click(this.account, "click on account");
