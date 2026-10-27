@@ -3,7 +3,11 @@ import { LoginPage } from './pages/LogIn/LoginPage';
 
 export default async function globalSetup() {
   const browser = await chromium.launch();
-  const context = await browser.newContext();
+  // const context = await browser.newContext();
+  const context = await browser.newContext({
+    timezoneId: 'Asia/Kolkata',
+    locale: 'en-IN',
+  });
   const page = await context.newPage();
 
   const login = new LoginPage(page);
