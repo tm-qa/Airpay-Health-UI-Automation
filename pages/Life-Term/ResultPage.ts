@@ -395,7 +395,7 @@ export class ResultPage extends BasePage {
 
         const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: scenario.planName });
         const viewAddonsForPlan = planCard.getByText(/view \d+ available addons/i);
-        console.log("viewAddonsForPlan", viewAddonsForPlan);
+        //console.log("viewAddonsForPlan", viewAddonsForPlan);
 
         await viewAddonsForPlan.waitFor({ state: "visible", timeout: 15000 });
         await this.click(viewAddonsForPlan, "click on View addons button");
