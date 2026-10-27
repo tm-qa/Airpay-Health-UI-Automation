@@ -390,7 +390,7 @@ export class ResultPage extends BasePage {
     }
 
     private async applyRidersForHDFCPlan(scenario: LifeTermScenario) {
-        console.log("applyRidersForHDFCPlan", scenario);
+        // console.log("applyRidersForHDFCPlan", scenario);
         if (![scenario.rider1, scenario.rider2, scenario.rider3, scenario.rider4, scenario.rider5].some(Boolean)) return;
 
         const planCard = this.page.locator(".LifeResultCard_card__kArGK", { hasText: scenario.planName });
