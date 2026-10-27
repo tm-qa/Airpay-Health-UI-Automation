@@ -71,7 +71,7 @@ export class CheckoutPage extends BasePage {
         await expect(this.page.getByText("Access Denied")).toBeVisible(); // temp chnge due to prod pointing and uncomment validateInsurerRedirection
         //await this.validateInsurerRedirection();
         // await this.biPdfCompare();
-        this.logUrl("Current Checkout page URL");
+        this.logUrl("Current page URL");
         this.log("Completed Checkout Journey");
         return true;
     }
@@ -294,7 +294,7 @@ export class CheckoutPage extends BasePage {
             return false;
         }
         // await this.biPdfCompare();
-        this.logUrl("Current Checkout page URL");
+        this.logUrl("Current page URL");
         this.log("Completed Checkout Journey");
         return true;
     }
