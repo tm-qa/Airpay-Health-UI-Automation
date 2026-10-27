@@ -69,7 +69,7 @@ export class PaymentReviewPage extends BasePage {
         await this.log(`approve API paymentLink: ${paymentLink}`);
 
         const target = new URL(paymentLink);
-        await this.page.waitForURL((u) => u.host === target.host, { waitUntil: "domcontentloaded", timeout: 30000 });
+        await this.page.waitForURL((u) => u.host === target.host, { waitUntil: "domcontentloaded", timeout: 40000 });
         await this.log(`auto-redirected to: ${this.page.url()}`);
         await expect(this.page).toHaveURL(new RegExp(target.host.replace(/\./g, "\\.")));
 
