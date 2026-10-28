@@ -45,6 +45,7 @@ export class CheckoutPage extends BasePage {
     readonly copyLink: Locator;
     readonly seeMoreQuotesLink: Locator;
     readonly config: InsurerConfig;
+    readonly proposerPan: Locator;
 
     constructor(page: Page, config: InsurerConfig) {
         super(page);
@@ -103,6 +104,7 @@ export class CheckoutPage extends BasePage {
         this.shareDialog = page.getByRole("dialog");
         this.copyLink = this.shareDialog.getByText("Copy Link", { exact: true });
         this.seeMoreQuotesLink = page.getByRole("link", { name: /See more quotes/i });
+        this.proposerPan = page.getByRole("textbox", { name: "PAN No. *" });
     }
 
     async fillProposalFormHealth(scenario: HealthScenario): Promise<string> {
@@ -157,6 +159,10 @@ export class CheckoutPage extends BasePage {
 
     private async fillInsuredDetails(scenario: HealthScenario) {
         await this.click(this.insuredDetailsHeading, "click on Insured Details heading");
+
+        if ((await this.isShown(this.proposerPan, 3000)) && (await this.proposerPan.isEnabled()) && !(await this.proposerPan.inputValue())) {
+            await this.fill(this.proposerPan, this.config.kyc.pan, "fill PAN");
+        }
 
         const proposerMarital = await this.byIdOr("proposerMaritalStatus", this.proposerMaritalStatus);
         await expect(proposerMarital).toBeAttached();
