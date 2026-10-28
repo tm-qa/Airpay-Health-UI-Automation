@@ -25,6 +25,7 @@ export interface HealthScenario {
     deductible: string;
     expectedPlan: string;
     planVisibility: string;
+    addOns: string[];
     members: HealthMember[];
     nominee: NomineeDetails;
     maritalStatus: string;

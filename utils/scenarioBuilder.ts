@@ -42,6 +42,7 @@ function buildScenario(row: Record<string, unknown>, config: InsurerConfig): Hea
         deductible: String(row.Deductible),
         expectedPlan: String(row.ExpectedPlan),
         planVisibility: String(row.PlanVisibility),
+        addOns: String(row.AddOn ?? "").split(",").map((a) => a.trim()).filter(Boolean),
         members,
         nominee: buildNominee(config.nominee),
         maritalStatus: resolveMaritalStatus(members),
