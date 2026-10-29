@@ -75,11 +75,13 @@ export class PaymentReviewPage extends BasePage {
         await this.log(`approve API paymentLink: ${paymentLink}`);
 
         const target = new URL(paymentLink);
-        await this.page.waitForURL((u) => u.host === target.host, { waitUntil: "domcontentloaded", timeout: 40000 });
+        // await this.page.waitForURL((u) => u.host === target.host, { waitUntil: "domcontentloaded", timeout: 40000 });
+        await this.page.waitForURL((u) => u.host === target.host, { waitUntil: "commit", timeout: 40000 });
         await this.log(`auto-redirected to: ${this.page.url()}`);
         await expect(this.page).toHaveURL(new RegExp(target.host.replace(/\./g, "\\.")));
 
-        await this.page.waitForLoadState("load", { timeout: 10000 }).catch(() => {});
+        await this.page.waitForLoadState("load", { timeout: 60000 }).catch(() => {});
+        await this.page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
         await this.fullScreenScreenshot("Redirected payment page");
         return true;
     }
