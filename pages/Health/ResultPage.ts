@@ -78,11 +78,11 @@ export class ResultPage extends BasePage {
         }
 
         await this.selectAddOns(plan, scenario.addOns);
-
+        await this.fullScreenScreenshot("Result page");
         await this.click(planCard.getByRole("button", { name: "View Details" }), "click on View Details button");
         await expect(this.buyNowBtn).toBeVisible();
         await this.waitForQuotes();
-        await this.fullScreenScreenshot("View Details");
+        await this.fullScreenScreenshot("PDP page");
 
         if (this.config.pdfWordingPattern && this.config.pdfBrochurePattern) {
             await this.downloadAndVerifyPDFs();
